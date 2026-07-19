@@ -1,6 +1,9 @@
 import CacheSet from "./CacheSet";
 import Statistics from "./Statistics";
 import type ReplacementPolicy from "./ReplacementPolicy";
+import type { AccessResult } from "../types/AccessResult";
+import type { AccessTrace } from "../types/AccessTrace";
+import type { CacheConfig } from "../types/CacheConfig.ts";
 
 export default class Cache {
 
@@ -14,25 +17,35 @@ export default class Cache {
     policy: ReplacementPolicy;
     statistics: Statistics;
 
-    constructor(
-        blockSize: number,
-        numberOfBlocks: number,
-        policy: ReplacementPolicy
-    ) {
+    private accessCounter = 0;
 
-        this.blockSize = blockSize;
-        this.numberOfBlocks = numberOfBlocks;
-        this.numberOfSets = numberOfBlocks / 4;
+    constructor(config: CacheConfig) {
 
-        this.policy = policy;
-        this.statistics = new Statistics();
-
-        this.sets = [];
-
-        for (let i = 0; i < this.numberOfSets; i++) {
-            this.sets.push(new CacheSet());
+        if (config.blockSize < 2 || !this.isPowerOfTwo(config.blockSize)) {
+            throw new Error("Block size must be a power of two and at least 2.");
         }
+
+        if (config.cacheBlocks < 4 || !this.isPowerOfTwo(config.cacheBlocks)) {
+            throw new Error("Cache blocks must be a power of two and at least 4.");
+        }
+
+    this.blockSize = config.blockSize;
+
+    this.numberOfBlocks = config.cacheBlocks;
+
+    this.numberOfSets = config.cacheBlocks / 4;
+
+    this.policy = config.replacementPolicy;
+
+    this.statistics = new Statistics();
+
+    this.sets = [];
+
+    for (let i = 0; i < this.numberOfSets; i++) {
+        this.sets.push(new CacheSet());
     }
+
+}
 
     private getSetIndex(memoryBlock: number): number {
         return memoryBlock % this.numberOfSets;
@@ -59,7 +72,7 @@ export default class Cache {
     
     }
 
-    access(memoryBlock: number): boolean {
+    access(memoryBlock: number): AccessResult {
 
         const setIndex = this.getSetIndex(memoryBlock);
 
@@ -75,7 +88,21 @@ export default class Cache {
 
             this.policy.recordAccess(set, blockIndex);
 
-            return true;
+            return {
+
+                memoryBlock,
+
+                setIndex,
+
+                tag,
+
+                hit: true,
+
+                way: blockIndex,
+
+                replaced: false
+
+            };
 
         }
 
@@ -85,19 +112,36 @@ export default class Cache {
 
         const block = set.blocks[victim];
 
+        const replaced = block.valid;
+
         block.valid = true;
         block.tag = tag;
         block.memoryBlock = memoryBlock;
 
         this.policy.recordAccess(set, victim);
 
-        return false;
+        return {
+
+            memoryBlock,
+
+            setIndex,
+
+            tag,
+
+            hit: false,
+
+            way: victim,
+
+            replaced
+
+        };
 
     }
 
     reset() {
 
         this.statistics = new Statistics();
+        this.accessCounter = 0;
 
         for (const set of this.sets) {
 
@@ -109,6 +153,35 @@ export default class Cache {
 
         }
 
+    }
+
+    runSequence(sequence: number[]): AccessTrace[] {
+
+        const trace: AccessTrace[] = [];
+
+        for (const block of sequence) {
+
+            this.accessCounter++;
+
+            const result = this.access(block);
+
+            trace.push({
+                accessNumber: this.accessCounter,
+                result
+            });
+
+        }
+
+        return trace;
+
+    }
+
+    private isPowerOfTwo(value: number): boolean {
+        return value > 0 && (value & (value - 1)) === 0;
+    }
+
+    getCacheState(): CacheSet[] {
+        return this.sets;
     }
 
 }

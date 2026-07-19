@@ -1,19 +1,28 @@
 import Cache from "./Cache";
 import LRU from "./policies/LRU";
+import SequenceGenerator from "./SequenceGenerator";
+import { SequenceType } from "../types/SequenceType";
+import { ReadPolicy } from "../types/ReadPolicy";
 
-const cache = new Cache(4, 16, new LRU());
+const cache = new Cache({
 
-const sequence = [0, 1, 2, 3, 0, 1, 2, 3];
+    blockSize: 4,
 
-for (const block of sequence) {
+    cacheBlocks: 16,
 
-    const hit = cache.access(block);
+    readPolicy: ReadPolicy.LoadThrough,
 
-    console.log(
-        block,
-        hit ? "HIT" : "MISS"
-    );
+    replacementPolicy: new LRU()
 
-}
+});
+
+const sequence = SequenceGenerator.generate(
+    SequenceType.Sequential,
+    16
+);
+
+const trace = cache.runSequence(sequence);
+
+console.log(trace);
 
 console.log(cache.statistics);
