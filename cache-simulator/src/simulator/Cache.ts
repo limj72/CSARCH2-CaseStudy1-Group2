@@ -4,6 +4,7 @@ import type ReplacementPolicy from "./ReplacementPolicy";
 import type { AccessResult } from "../types/AccessResult";
 import type { AccessTrace } from "../types/AccessTrace";
 import type { CacheConfig } from "../types/CacheConfig.ts";
+import type { SimulationResult } from "../types/SimulationResult";
 
 export default class Cache {
 
@@ -155,7 +156,7 @@ export default class Cache {
 
     }
 
-    runSequence(sequence: number[]): AccessTrace[] {
+    runSequence(sequence: number[]): SimulationResult {
 
         const trace: AccessTrace[] = [];
 
@@ -172,7 +173,11 @@ export default class Cache {
 
         }
 
-        return trace;
+        return {
+            trace,
+            statistics: this.statistics,
+            cacheState: this.getCacheState()
+        };
 
     }
 
@@ -181,7 +186,7 @@ export default class Cache {
     }
 
     getCacheState(): CacheSet[] {
-        return this.sets;
+        return this.sets.map(set => set);
     }
 
 }

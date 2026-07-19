@@ -6,6 +6,9 @@ export default class Statistics {
 
     misses = 0;
 
+    readonly CACHE_HIT_TIME = 1;
+    readonly MEMORY_ACCESS_TIME = 10;   //*Based on previous examples
+
     recordHit() {
         this.accesses++;
         this.hits++;
@@ -28,6 +31,18 @@ export default class Statistics {
             return 0;
 
         return this.misses / this.accesses;
+    }
+
+    get averageMemoryAccessTime(): number {
+        return (
+            this.hitRate * this.CACHE_HIT_TIME +
+            this.missRate *
+                (this.CACHE_HIT_TIME + this.MEMORY_ACCESS_TIME)
+        );
+    }
+
+    get totalMemoryAccessTime(): number {
+        return this.averageMemoryAccessTime * this.accesses;
     }
 
 }

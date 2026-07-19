@@ -8,6 +8,10 @@ import SequenceGenerator from "../simulator/SequenceGenerator";
 import { ReadPolicies } from "../types/ReadPolicy";
 import { SequenceTypes } from "../types/SequenceType";
 
+import type { SimulationResult } from "../types/SimulationResult";
+
+import StatisticsPanel from "./StatisticsPanel";
+
 export default function ControlPanel() {
 
     const [blockSize, setBlockSize] = useState(4);
@@ -22,6 +26,9 @@ export default function ControlPanel() {
 
     const [sequenceType, setSequenceType] =
         useState(SequenceTypes.Sequential);
+
+    const [result, setResult] =
+        useState<SimulationResult | null>(null);
 
     function runSimulation() {
 
@@ -48,14 +55,13 @@ export default function ControlPanel() {
                 cacheBlocks
             );
 
-        const trace =
+        const result =
             cache.runSequence(sequence);
 
-        console.clear();
 
-        console.table(trace);
+        setResult(result);
 
-        console.log(cache.statistics);
+        console.table(result.trace);
 
     }
 
@@ -195,6 +201,12 @@ export default function ControlPanel() {
             <button onClick={runSimulation}>
                 Run Simulation
             </button>
+
+            <hr/>
+
+            <StatisticsPanel
+                statistics={result?.statistics ?? null}
+            />
 
         </div>
 
