@@ -1,4 +1,5 @@
-import { SequenceType } from "../types/SequenceType";
+import { SequenceTypes } from "../types/SequenceType";
+import type { SequenceType } from "../types/SequenceType";
 
 export default class SequenceGenerator {
 
@@ -9,13 +10,13 @@ export default class SequenceGenerator {
 
         switch (type) {
 
-            case SequenceType.Sequential:
+            case SequenceTypes.Sequential:
                 return this.generateSequential(cacheBlocks);
 
-            case SequenceType.MidRepeat:
+            case SequenceTypes.MidRepeat:
                 return this.generateMidRepeat(cacheBlocks);
 
-            case SequenceType.Random:
+            case SequenceTypes.Random:
                 return this.generateRandom();
 
             default:

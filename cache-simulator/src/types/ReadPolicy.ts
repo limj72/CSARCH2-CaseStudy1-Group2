@@ -1,7 +1,7 @@
-export const ReadPolicy = {
+export const ReadPolicies = {
     LoadThrough: "LoadThrough",
     NonLoadThrough: "NonLoadThrough",
 } as const;
 
 export type ReadPolicy =
-    typeof ReadPolicy[keyof typeof ReadPolicy];
+    typeof ReadPolicies[keyof typeof ReadPolicies];

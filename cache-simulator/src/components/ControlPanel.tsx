@@ -1,7 +1,203 @@
+import { useState } from "react";
+
+import Cache from "../simulator/Cache";
+import LRU from "../simulator/policies/LRU";
+import MRU from "../simulator/policies/MRU";
+import SequenceGenerator from "../simulator/SequenceGenerator";
+
+import { ReadPolicies } from "../types/ReadPolicy";
+import { SequenceTypes } from "../types/SequenceType";
+
 export default function ControlPanel() {
+
+    const [blockSize, setBlockSize] = useState(4);
+
+    const [cacheBlocks, setCacheBlocks] = useState(16);
+
+    const [replacement, setReplacement] =
+        useState<"LRU" | "MRU">("LRU");
+
+    const [readPolicy, setReadPolicy] =
+        useState(ReadPolicies.LoadThrough);
+
+    const [sequenceType, setSequenceType] =
+        useState(SequenceTypes.Sequential);
+
+    function runSimulation() {
+
+        const policy =
+            replacement === "LRU"
+                ? new LRU()
+                : new MRU();
+
+        const cache = new Cache({
+
+            blockSize,
+
+            cacheBlocks,
+
+            readPolicy,
+
+            replacementPolicy: policy
+
+        });
+
+        const sequence =
+            SequenceGenerator.generate(
+                sequenceType,
+                cacheBlocks
+            );
+
+        const trace =
+            cache.runSequence(sequence);
+
+        console.clear();
+
+        console.table(trace);
+
+        console.log(cache.statistics);
+
+    }
+
     return (
-        <section>
+
+        <div>
+
             <h2>Control Panel</h2>
-        </section>
+
+            <br />
+
+            <label>
+
+                Block Size
+
+                <select
+                    value={blockSize}
+                    onChange={(e) =>
+                        setBlockSize(Number(e.target.value))
+                    }
+                >
+
+                    <option value={2}>2</option>
+                    <option value={4}>4</option>
+                    <option value={8}>8</option>
+                    <option value={16}>16</option>
+
+                </select>
+
+            </label>
+
+            <br /><br />
+
+            <label>
+
+                Cache Blocks
+
+                <select
+                    value={cacheBlocks}
+                    onChange={(e) =>
+                        setCacheBlocks(Number(e.target.value))
+                    }
+                >
+
+                    <option value={4}>4</option>
+                    <option value={8}>8</option>
+                    <option value={16}>16</option>
+                    <option value={32}>32</option>
+                    <option value={64}>64</option>
+
+                </select>
+
+            </label>
+
+            <br /><br />
+
+            <label>
+
+                Replacement Policy
+
+                <select
+                    value={replacement}
+                    onChange={(e) =>
+                        setReplacement(
+                            e.target.value as "LRU" | "MRU"
+                        )
+                    }
+                >
+
+                    <option value="LRU">LRU</option>
+                    <option value="MRU">MRU</option>
+
+                </select>
+
+            </label>
+
+            <br /><br />
+
+            <label>
+
+                Read Policy
+
+                <select
+                    value={readPolicy}
+                    onChange={(e) =>
+                        setReadPolicy(
+                            e.target.value as typeof readPolicy
+                        )
+                    }
+                >
+
+                    <option value={ReadPolicies.LoadThrough}>
+                        Load Through
+                    </option>
+
+                    <option value={ReadPolicies.NonLoadThrough}>
+                        Non-Load Through
+                    </option>
+
+                </select>
+
+            </label>
+
+            <br /><br />
+
+            <label>
+
+                Test Sequence
+
+                <select
+                    value={sequenceType}
+                    onChange={(e) =>
+                        setSequenceType(
+                            e.target.value as typeof sequenceType
+                        )
+                    }
+                >
+
+                    <option value={SequenceTypes.Sequential}>
+                        Sequential
+                    </option>
+
+                    <option value={SequenceTypes.MidRepeat}>
+                        Mid Repeat
+                    </option>
+
+                    <option value={SequenceTypes.Random}>
+                        Random
+                    </option>
+
+                </select>
+
+            </label>
+
+            <br /><br />
+
+            <button onClick={runSimulation}>
+                Run Simulation
+            </button>
+
+        </div>
+
     );
+
 }

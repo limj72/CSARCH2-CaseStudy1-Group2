@@ -1,8 +1,8 @@
-export const SequenceType = {
+export const SequenceTypes = {
     Sequential: "Sequential",
     MidRepeat: "MidRepeat",
     Random: "Random",
 } as const;
 
 export type SequenceType =
-    typeof SequenceType[keyof typeof SequenceType];
+    typeof SequenceTypes[keyof typeof SequenceTypes];
