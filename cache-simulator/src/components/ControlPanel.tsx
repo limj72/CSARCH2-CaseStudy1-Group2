@@ -11,6 +11,7 @@ import { SequenceTypes } from "../types/SequenceType";
 import type { SimulationResult } from "../types/SimulationResult";
 
 import StatisticsPanel from "./StatisticsPanel";
+import TraceLog from "./TraceLog";
 
 export default function ControlPanel() {
 
@@ -206,6 +207,10 @@ export default function ControlPanel() {
 
             <StatisticsPanel
                 statistics={result?.statistics ?? null}
+            />
+
+            <TraceLog
+                trace={result?.trace ?? []}
             />
 
         </div>
