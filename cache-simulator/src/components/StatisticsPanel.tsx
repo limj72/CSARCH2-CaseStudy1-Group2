@@ -20,11 +20,8 @@ export default function StatisticsPanel({
     return (
         <div>
             <h2>Statistics</h2>
-
             <p>Total Accesses: {statistics.accesses}</p>
-
             <p>Hits: {statistics.hits}</p>
-
             <p>Misses: {statistics.misses}</p>
 
             <p>

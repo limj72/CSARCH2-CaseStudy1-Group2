@@ -26,7 +26,6 @@ export default function TraceLog({ trace, currentStep, highlight}: TraceLogProps
                                 <th>Result</th>
                                 <th>Way</th>
                                 <th>Replaced?</th>
-
                             </tr>
                         </thead>
 
@@ -43,6 +42,7 @@ export default function TraceLog({ trace, currentStep, highlight}: TraceLogProps
                                                 : undefined
                                     }}
                                 >
+                                    
                                     <td>{entry.accessNumber}</td>
                                     <td>{entry.result.memoryBlock}</td>
                                     <td>{entry.result.setIndex}</td>
