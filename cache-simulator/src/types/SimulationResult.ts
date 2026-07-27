@@ -1,9 +1,7 @@
-import type { AccessTrace } from "./AccessTrace";
+import type { SimulationStep } from "./SimulationStep";
 import Statistics from "../simulator/Statistics";
-import CacheSet from "../simulator/CacheSet";
 
 export interface SimulationResult {
-    trace: AccessTrace[];
+    steps: SimulationStep[];
     statistics: Statistics;
-    cacheState: CacheSet[];
 }

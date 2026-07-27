@@ -5,6 +5,7 @@ import type { AccessResult } from "../types/AccessResult";
 import type { AccessTrace } from "../types/AccessTrace";
 import type { CacheConfig } from "../types/CacheConfig.ts";
 import type { SimulationResult } from "../types/SimulationResult";
+import type { SimulationStep } from "../types/SimulationStep";
 
 export default class Cache {
 
@@ -31,15 +32,10 @@ export default class Cache {
         }
 
     this.blockSize = config.blockSize;
-
     this.numberOfBlocks = config.cacheBlocks;
-
     this.numberOfSets = config.cacheBlocks / 4;
-
     this.policy = config.replacementPolicy;
-
     this.statistics = new Statistics();
-
     this.sets = [];
 
     for (let i = 0; i < this.numberOfSets; i++) {
@@ -58,61 +54,40 @@ export default class Cache {
 
     private findBlock(set: CacheSet, tag: number): number {
 
-    for (let i = 0; i < set.blocks.length; i++) {
+        for (let i = 0; i < set.blocks.length; i++) {
+            const block = set.blocks[i];
+            if (block.valid && block.tag === tag) {
+                return i;
+            }
 
-        const block = set.blocks[i];
-
-        if (block.valid && block.tag === tag) {
-            return i;
         }
-
-    }
-
-    return -1;
-
-    
+        
+        return -1;
     }
 
     access(memoryBlock: number): AccessResult {
 
         const setIndex = this.getSetIndex(memoryBlock);
-
         const tag = this.getTag(memoryBlock);
-
         const set = this.sets[setIndex];
-
         const blockIndex = this.findBlock(set, tag);
 
         if (blockIndex !== -1) {
-
             this.statistics.recordHit();
-
             this.policy.recordAccess(set, blockIndex);
-
             return {
-
                 memoryBlock,
-
                 setIndex,
-
                 tag,
-
                 hit: true,
-
                 way: blockIndex,
-
                 replaced: false
-
             };
-
         }
 
         this.statistics.recordMiss();
-
         const victim = this.policy.selectVictim(set);
-
         const block = set.blocks[victim];
-
         const replaced = block.valid;
 
         block.valid = true;
@@ -122,61 +97,48 @@ export default class Cache {
         this.policy.recordAccess(set, victim);
 
         return {
-
             memoryBlock,
-
             setIndex,
-
             tag,
-
             hit: false,
-
             way: victim,
-
             replaced
-
         };
 
     }
 
     reset() {
-
         this.statistics = new Statistics();
         this.accessCounter = 0;
 
         for (const set of this.sets) {
-
             for (const block of set.blocks) {
-
                 block.clear();
-
             }
-
         }
-
     }
 
     runSequence(sequence: number[]): SimulationResult {
+        this.reset();
+        const steps: SimulationStep[] = [];
 
-        const trace: AccessTrace[] = [];
-
-        for (const block of sequence) {
-
-            this.accessCounter++;
-
+        for (let i = 0; i < sequence.length; i++) {
+            const block = sequence[i];
             const result = this.access(block);
-
-            trace.push({
-                accessNumber: this.accessCounter,
+            const trace: AccessTrace = {
+                accessNumber: i + 1,
                 result
-            });
+            };
 
+            steps.push({
+                trace,
+                cacheState: this.cloneCacheState()
+            });
         }
 
         return {
-            trace,
-            statistics: this.statistics,
-            cacheState: this.getCacheState()
+            steps,
+            statistics: this.statistics
         };
 
     }
@@ -187,6 +149,16 @@ export default class Cache {
 
     getCacheState(): CacheSet[] {
         return this.sets.map(set => set);
+    }
+
+    private cloneCacheState(): CacheSet[] {
+
+        return this.sets.map((set) => {
+            const clonedSet = new CacheSet();
+            clonedSet.blocks = set.blocks.map(block => block.clone());
+            return clonedSet;
+        });
+
     }
 
 }

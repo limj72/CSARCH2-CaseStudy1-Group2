@@ -17,20 +17,21 @@ import CacheGrid from "./CacheGrid";
 export default function ControlPanel() {
 
     const [blockSize, setBlockSize] = useState(4);
-
     const [cacheBlocks, setCacheBlocks] = useState(16);
-
-    const [replacement, setReplacement] =
-        useState<"LRU" | "MRU">("LRU");
-
-    const [readPolicy, setReadPolicy] =
-        useState(ReadPolicies.LoadThrough);
-
-    const [sequenceType, setSequenceType] =
-        useState(SequenceTypes.Sequential);
-
-    const [result, setResult] =
-        useState<SimulationResult | null>(null);
+    const [replacement, setReplacement] = useState<"LRU" | "MRU">("LRU");
+    const [readPolicy, setReadPolicy] = useState(ReadPolicies.LoadThrough);
+    const [sequenceType, setSequenceType] = useState(SequenceTypes.Sequential);
+    const [result, setResult] = useState<SimulationResult | null>(null);
+    const [viewMode, setViewMode] = useState<"final" | "step">("final");
+    const [currentStepIndex, setCurrentStepIndex] = useState(0);
+    const currentStep =
+        result
+            ? (
+                viewMode === "final"
+                    ? result.steps[result.steps.length - 1]
+                    : result.steps[currentStepIndex]
+            )
+            : undefined;
 
     function runSimulation() {
 
@@ -40,15 +41,10 @@ export default function ControlPanel() {
                 : new MRU();
 
         const cache = new Cache({
-
             blockSize,
-
             cacheBlocks,
-
             readPolicy,
-
             replacementPolicy: policy
-
         });
 
         const sequence =
@@ -57,14 +53,12 @@ export default function ControlPanel() {
                 cacheBlocks
             );
 
-        const result =
-            cache.runSequence(sequence);
-
+        const result = cache.runSequence(sequence);
 
         setResult(result);
+        setCurrentStepIndex(0);
 
-        console.table(result.trace);
-
+        //console.table(result.trace);
     }
 
     return (
@@ -72,31 +66,44 @@ export default function ControlPanel() {
         <>
 
             <div className="top-row">
-
                 <div className="panel">
-
                     <h2>Control Panel</h2>
+                    <label>
+                        View Mode
+                        <select
+                            value={viewMode}
+                            onChange={(e) =>
+                                setViewMode(
+                                    e.target.value as "final" | "step"
+                                )
+                            }
+                        >
+                            <option value="final">
+                                Final Snapshot
+                            </option>
+
+                            <option value="step">
+                                Step-by-Step
+                            </option>
+
+                        </select>
+
+                    </label>
 
                     <label>
-
                         Block Size
-
                         <select
                             value={blockSize}
                             onChange={(e) =>
                                 setBlockSize(Number(e.target.value))
                             }
                         >
-
                             <option value={2}>2</option>
                             <option value={4}>4</option>
                             <option value={8}>8</option>
                             <option value={16}>16</option>
-
                         </select>
-
                     </label>
-
                     <label>
 
                         Cache Blocks
@@ -119,9 +126,7 @@ export default function ControlPanel() {
                     </label>
 
                     <label>
-
                         Replacement Policy
-
                         <select
                             value={replacement}
                             onChange={(e) =>
@@ -130,12 +135,9 @@ export default function ControlPanel() {
                                 )
                             }
                         >
-
                             <option value="LRU">LRU</option>
                             <option value="MRU">MRU</option>
-
                         </select>
-
                     </label>
 
                     <label>
@@ -196,6 +198,43 @@ export default function ControlPanel() {
                         Run Simulation
                     </button>
 
+                    {viewMode === "step" && result && (
+
+                        <div style={{ marginTop: "15px" }}>
+
+                            <button
+                                onClick={() =>
+                                    setCurrentStepIndex(i =>
+                                        Math.max(0, i - 1)
+                                    )
+                                }
+                            >
+                                ◀ Previous
+                            </button>
+
+                            <p>
+                                Step {currentStepIndex + 1}
+                                {" / "}
+                                {result.steps.length}
+                            </p>
+
+                            <button
+                                onClick={() =>
+                                    setCurrentStepIndex(i =>
+                                        Math.min(
+                                            result.steps.length - 1,
+                                            i + 1
+                                        )
+                                    )
+                                }
+                            >
+                                Next ▶
+                            </button>
+
+                        </div>
+
+                    )}
+
                 </div>
 
                 <div className="panel">
@@ -211,7 +250,7 @@ export default function ControlPanel() {
             <div className="full-width">
 
                 <CacheGrid
-                    cacheState={result?.cacheState ?? []}
+                    cacheState={currentStep?.cacheState ?? []}
                 />
 
             </div>
@@ -219,7 +258,9 @@ export default function ControlPanel() {
             <div className="full-width">
 
                 <TraceLog
-                    trace={result?.trace ?? []}
+                    trace={result?.steps.map(step => step.trace) ?? []}
+                    currentStep={currentStepIndex}
+                    highlight={viewMode === "step"}
                 />
 
             </div>
