@@ -130,3 +130,21 @@ th {
 tbody tr:nth-child(even) {
     background: #fafafa;
 }
+
+.cache-set {
+
+    margin-bottom: 30px;
+
+}
+
+.cache-block {
+
+    min-width: 110px;
+
+    height: 70px;
+
+    text-align: center;
+
+    vertical-align: middle;
+
+}

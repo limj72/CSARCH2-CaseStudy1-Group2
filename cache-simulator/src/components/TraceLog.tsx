@@ -18,60 +18,64 @@ export default function TraceLog({ trace }: TraceLogProps) {
 
             ) : (
 
-                <table>
+                <div className="trace-container">
 
-                    <thead>
+                    <table>
 
-                        <tr>
+                        <thead>
 
-                            <th>#</th>
-                            <th>Block</th>
-                            <th>Set</th>
-                            <th>Tag</th>
-                            <th>Result</th>
-                            <th>Way</th>
-                            <th>Replaced?</th>
+                            <tr>
 
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {trace.map((entry) => (
-
-                            <tr key={entry.accessNumber}>
-
-                                <td>{entry.accessNumber}</td>
-
-                                <td>{entry.result.memoryBlock}</td>
-
-                                <td>{entry.result.setIndex}</td>
-
-                                <td>{entry.result.tag}</td>
-
-                                <td
-                                    style={{
-                                        color: entry.result.hit ? "green" : "red",
-                                        fontWeight: "bold",
-                                    }}
-                                >
-                                    {entry.result.hit ? "HIT" : "MISS"}
-                                </td>
-
-                                <td>{entry.result.way}</td>
-
-                                <td>
-                                    {entry.result.replaced ? "Yes" : "No"}
-                                </td>
+                                <th>#</th>
+                                <th>Block</th>
+                                <th>Set</th>
+                                <th>Tag</th>
+                                <th>Result</th>
+                                <th>Way</th>
+                                <th>Replaced?</th>
 
                             </tr>
 
-                        ))}
+                        </thead>
 
-                    </tbody>
+                        <tbody>
 
-                </table>
+                            {trace.map((entry) => (
+
+                                <tr key={entry.accessNumber}>
+
+                                    <td>{entry.accessNumber}</td>
+
+                                    <td>{entry.result.memoryBlock}</td>
+
+                                    <td>{entry.result.setIndex}</td>
+
+                                    <td>{entry.result.tag}</td>
+
+                                    <td
+                                        style={{
+                                            color: entry.result.hit ? "green" : "red",
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        {entry.result.hit ? "HIT" : "MISS"}
+                                    </td>
+
+                                    <td>{entry.result.way}</td>
+
+                                    <td>
+                                        {entry.result.replaced ? "Yes" : "No"}
+                                    </td>
+
+                                </tr>
+
+                            ))}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
 
             )}
 

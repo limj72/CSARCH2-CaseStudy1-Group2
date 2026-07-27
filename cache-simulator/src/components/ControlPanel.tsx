@@ -12,6 +12,7 @@ import type { SimulationResult } from "../types/SimulationResult";
 
 import StatisticsPanel from "./StatisticsPanel";
 import TraceLog from "./TraceLog";
+import CacheGrid from "./CacheGrid";
 
 export default function ControlPanel() {
 
@@ -68,153 +69,162 @@ export default function ControlPanel() {
 
     return (
 
-        <div>
+        <>
 
-            <h2>Control Panel</h2>
+            <div className="top-row">
 
-            <br />
+                <div className="panel">
 
-            <label>
+                    <h2>Control Panel</h2>
 
-                Block Size
+                    <label>
 
-                <select
-                    value={blockSize}
-                    onChange={(e) =>
-                        setBlockSize(Number(e.target.value))
-                    }
-                >
+                        Block Size
 
-                    <option value={2}>2</option>
-                    <option value={4}>4</option>
-                    <option value={8}>8</option>
-                    <option value={16}>16</option>
+                        <select
+                            value={blockSize}
+                            onChange={(e) =>
+                                setBlockSize(Number(e.target.value))
+                            }
+                        >
 
-                </select>
+                            <option value={2}>2</option>
+                            <option value={4}>4</option>
+                            <option value={8}>8</option>
+                            <option value={16}>16</option>
 
-            </label>
+                        </select>
 
-            <br /><br />
+                    </label>
 
-            <label>
+                    <label>
 
-                Cache Blocks
+                        Cache Blocks
 
-                <select
-                    value={cacheBlocks}
-                    onChange={(e) =>
-                        setCacheBlocks(Number(e.target.value))
-                    }
-                >
+                        <select
+                            value={cacheBlocks}
+                            onChange={(e) =>
+                                setCacheBlocks(Number(e.target.value))
+                            }
+                        >
 
-                    <option value={4}>4</option>
-                    <option value={8}>8</option>
-                    <option value={16}>16</option>
-                    <option value={32}>32</option>
-                    <option value={64}>64</option>
+                            <option value={4}>4</option>
+                            <option value={8}>8</option>
+                            <option value={16}>16</option>
+                            <option value={32}>32</option>
+                            <option value={64}>64</option>
 
-                </select>
+                        </select>
 
-            </label>
+                    </label>
 
-            <br /><br />
+                    <label>
 
-            <label>
+                        Replacement Policy
 
-                Replacement Policy
+                        <select
+                            value={replacement}
+                            onChange={(e) =>
+                                setReplacement(
+                                    e.target.value as "LRU" | "MRU"
+                                )
+                            }
+                        >
 
-                <select
-                    value={replacement}
-                    onChange={(e) =>
-                        setReplacement(
-                            e.target.value as "LRU" | "MRU"
-                        )
-                    }
-                >
+                            <option value="LRU">LRU</option>
+                            <option value="MRU">MRU</option>
 
-                    <option value="LRU">LRU</option>
-                    <option value="MRU">MRU</option>
+                        </select>
 
-                </select>
+                    </label>
 
-            </label>
+                    <label>
 
-            <br /><br />
+                        Read Policy
 
-            <label>
+                        <select
+                            value={readPolicy}
+                            onChange={(e) =>
+                                setReadPolicy(
+                                    e.target.value as typeof readPolicy
+                                )
+                            }
+                        >
 
-                Read Policy
+                            <option value={ReadPolicies.LoadThrough}>
+                                Load Through
+                            </option>
 
-                <select
-                    value={readPolicy}
-                    onChange={(e) =>
-                        setReadPolicy(
-                            e.target.value as typeof readPolicy
-                        )
-                    }
-                >
+                            <option value={ReadPolicies.NonLoadThrough}>
+                                Non-Load Through
+                            </option>
 
-                    <option value={ReadPolicies.LoadThrough}>
-                        Load Through
-                    </option>
+                        </select>
 
-                    <option value={ReadPolicies.NonLoadThrough}>
-                        Non-Load Through
-                    </option>
+                    </label>
 
-                </select>
+                    <label>
 
-            </label>
+                        Test Sequence
 
-            <br /><br />
+                        <select
+                            value={sequenceType}
+                            onChange={(e) =>
+                                setSequenceType(
+                                    e.target.value as typeof sequenceType
+                                )
+                            }
+                        >
 
-            <label>
+                            <option value={SequenceTypes.Sequential}>
+                                Sequential
+                            </option>
 
-                Test Sequence
+                            <option value={SequenceTypes.MidRepeat}>
+                                Mid Repeat
+                            </option>
 
-                <select
-                    value={sequenceType}
-                    onChange={(e) =>
-                        setSequenceType(
-                            e.target.value as typeof sequenceType
-                        )
-                    }
-                >
+                            <option value={SequenceTypes.Random}>
+                                Random
+                            </option>
 
-                    <option value={SequenceTypes.Sequential}>
-                        Sequential
-                    </option>
+                        </select>
 
-                    <option value={SequenceTypes.MidRepeat}>
-                        Mid Repeat
-                    </option>
+                    </label>
 
-                    <option value={SequenceTypes.Random}>
-                        Random
-                    </option>
+                    <button onClick={runSimulation}>
+                        Run Simulation
+                    </button>
 
-                </select>
+                </div>
 
-            </label>
+                <div className="panel">
 
-            <br /><br />
+                    <StatisticsPanel
+                        statistics={result?.statistics ?? null}
+                    />
 
-            <button onClick={runSimulation}>
-                Run Simulation
-            </button>
+                </div>
 
-            <hr/>
+            </div>
 
-            <StatisticsPanel
-                statistics={result?.statistics ?? null}
-            />
+            <div className="full-width">
 
-            <TraceLog
-                trace={result?.trace ?? []}
-            />
+                <CacheGrid
+                    cacheState={result?.cacheState ?? []}
+                />
 
-        </div>
+            </div>
+
+            <div className="full-width">
+
+                <TraceLog
+                    trace={result?.trace ?? []}
+                />
+
+            </div>
+
+        </>
 
     );
-
 }

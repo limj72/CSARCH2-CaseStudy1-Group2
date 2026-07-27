@@ -1,3 +1,4 @@
+import "../App.css";
 import ControlPanel from "../components/ControlPanel";
 
 export default function Simulator() {
