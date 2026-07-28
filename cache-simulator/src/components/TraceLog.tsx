@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { AccessTrace } from "../types/AccessTrace";
 
 interface TraceLogProps {
@@ -6,61 +7,87 @@ interface TraceLogProps {
     highlight: boolean;
 }
 
-export default function TraceLog({ trace, currentStep, highlight}: TraceLogProps) {
+export default function TraceLog({ trace, currentStep, highlight }: TraceLogProps) {
+    const activeRowRef = useRef<HTMLTableRowElement | null>(null);
+
+    // Auto-scroll active step row into view
+    useEffect(() => {
+        if (highlight && activeRowRef.current) {
+            activeRowRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+            });
+        }
+    }, [currentStep, highlight]);
 
     return (
         <div>
-            <h2>Memory Access Trace</h2>
-            {trace.length === 0 ? (
-                <p>No simulation has been run.</p>
-            ) : (
+            <h2 className="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Memory Access Execution Trace Log
+            </h2>
 
+            {trace.length === 0 ? (
+                <div className="stats-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    <p>Run a simulation to generate access step history</p>
+                </div>
+            ) : (
                 <div className="trace-container">
-                    <table>
+                    <table className="trace-table">
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Block</th>
-                                <th>Set</th>
+                                <th>Memory Block</th>
+                                <th>Set Index</th>
                                 <th>Tag</th>
                                 <th>Result</th>
-                                <th>Way</th>
-                                <th>Replaced?</th>
+                                <th>Target Way</th>
+                                <th>Evicted/Replaced</th>
                             </tr>
                         </thead>
 
                         <tbody>
+                            {trace.map((entry, index) => {
+                                const isCurrent = highlight && currentStep === index;
 
-                            {trace.map((entry, index) => (
-                                <tr
-                                    key={entry.accessNumber}
-                                    style={{
-                                        backgroundColor:
-                                            highlight &&
-                                            currentStep === index
-                                                ? "#fff3b0"
-                                                : undefined
-                                    }}
-                                >
-                                    
-                                    <td>{entry.accessNumber}</td>
-                                    <td>{entry.result.memoryBlock}</td>
-                                    <td>{entry.result.setIndex}</td>
-                                    <td>{entry.result.tag}</td>
-                                    <td
-                                        style={{
-                                            color: entry.result.hit ? "green" : "red",
-                                            fontWeight: "bold",
-                                        }}
+                                return (
+                                    <tr
+                                        key={entry.accessNumber}
+                                        ref={isCurrent ? activeRowRef : null}
+                                        className={isCurrent ? "highlighted" : ""}
                                     >
-                                        {entry.result.hit ? "HIT" : "MISS"}
-                                    </td>
-                                    <td>{entry.result.way}</td>
-                                    <td>
-                                        {entry.result.replaced ? "Yes" : "No"}
-                                    </td>
-                                </tr>
-                            ))}
+                                        <td>{entry.accessNumber}</td>
+                                        <td><strong>#{entry.result.memoryBlock}</strong></td>
+                                        <td>Set {entry.result.setIndex}</td>
+                                        <td>Tag {entry.result.tag}</td>
+                                        <td>
+                                            <span className={
+                                                entry.result.hit ? "pill pill-hit" : "pill pill-miss"
+                                            }>
+                                                {entry.result.hit ? "HIT" : "MISS"}
+                                            </span>
+                                        </td>
+                                        <td>Way {entry.result.way}</td>
+                                        <td>
+                                            {entry.result.replaced ? "Yes (Evicted)" : "—"}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

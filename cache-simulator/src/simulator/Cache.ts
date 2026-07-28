@@ -3,7 +3,8 @@ import Statistics from "./Statistics";
 import type ReplacementPolicy from "./ReplacementPolicy";
 import type { AccessResult } from "../types/AccessResult";
 import type { AccessTrace } from "../types/AccessTrace";
-import type { CacheConfig } from "../types/CacheConfig.ts";
+import type { CacheConfig } from "../types/CacheConfig";
+import type { ReadPolicy } from "../types/ReadPolicy";
 import type { SimulationResult } from "../types/SimulationResult";
 import type { SimulationStep } from "../types/SimulationStep";
 
@@ -14,12 +15,11 @@ export default class Cache {
     blockSize: number;
     numberOfBlocks: number;
     numberOfSets: number;
+    readPolicy: ReadPolicy;
 
     sets: CacheSet[];
     policy: ReplacementPolicy;
     statistics: Statistics;
-
-    private accessCounter = 0;
 
     constructor(config: CacheConfig) {
 
@@ -31,18 +31,19 @@ export default class Cache {
             throw new Error("Cache blocks must be a power of two and at least 4.");
         }
 
-    this.blockSize = config.blockSize;
-    this.numberOfBlocks = config.cacheBlocks;
-    this.numberOfSets = config.cacheBlocks / 4;
-    this.policy = config.replacementPolicy;
-    this.statistics = new Statistics();
-    this.sets = [];
+        this.blockSize = config.blockSize;
+        this.numberOfBlocks = config.cacheBlocks;
+        this.numberOfSets = config.cacheBlocks / 4;
+        this.readPolicy = config.readPolicy;
+        this.policy = config.replacementPolicy;
+        this.statistics = new Statistics(config.blockSize, config.readPolicy);
+        this.sets = [];
 
-    for (let i = 0; i < this.numberOfSets; i++) {
-        this.sets.push(new CacheSet());
+        for (let i = 0; i < this.numberOfSets; i++) {
+            this.sets.push(new CacheSet());
+        }
+
     }
-
-}
 
     private getSetIndex(memoryBlock: number): number {
         return memoryBlock % this.numberOfSets;
@@ -108,8 +109,7 @@ export default class Cache {
     }
 
     reset() {
-        this.statistics = new Statistics();
-        this.accessCounter = 0;
+        this.statistics = new Statistics(this.blockSize, this.readPolicy);
 
         for (const set of this.sets) {
             for (const block of set.blocks) {
