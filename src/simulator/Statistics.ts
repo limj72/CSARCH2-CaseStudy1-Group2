@@ -29,6 +29,7 @@ export default class Statistics {
     }
 
     get hitRate() {
+        // Avoid division by 0 before any accesses occur
         if (this.accesses === 0)
             return 0;
 
@@ -36,18 +37,22 @@ export default class Statistics {
     }
 
     get missRate() {
+        // Avoid division by 0 before any accesses occur
         if (this.accesses === 0)
             return 0;
 
         return this.misses / this.accesses;
     }
 
+    // Calculates the miss penalty based on selected read policy
     get missPenalty(): number {
         if (this.readPolicy === ReadPolicies.NonLoadThrough) {
             // Non-Load-Through: entire block must be loaded into cache first before CPU access
+            // +1 cycle accounts for time for cache lookup
             return (this.blockSize * this.MEMORY_ACCESS_TIME) + this.CACHE_HIT_TIME + 1;
         } else {
             // Load-Through: requested word is sent directly to CPU while loading into cache
+            // +1 cycle accounts for time for cache lookup
             return this.MEMORY_ACCESS_TIME + 1;
         }
     }
