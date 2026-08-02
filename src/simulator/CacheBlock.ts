@@ -21,6 +21,9 @@ export default class CacheBlock {
         this.lastAccess = 0;
     }
 
+    // Creates a "deep copy" of this cache block:
+    // Saves snapshots of cache after each memory access
+    // so future changes do not affect previos simulation states
     clone(): CacheBlock {
 
         const copy = new CacheBlock();
