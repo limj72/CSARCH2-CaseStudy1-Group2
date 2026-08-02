@@ -6,6 +6,7 @@ export default class Statistics {
     hits = 0;
     misses = 0;
 
+    // Based on previous examples
     readonly CACHE_HIT_TIME = 1;
     readonly MEMORY_ACCESS_TIME = 10;
 
@@ -44,17 +45,18 @@ export default class Statistics {
     get missPenalty(): number {
         if (this.readPolicy === ReadPolicies.NonLoadThrough) {
             // Non-Load-Through: entire block must be loaded into cache first before CPU access
-            return (this.blockSize * this.MEMORY_ACCESS_TIME) + this.CACHE_HIT_TIME;
+            return (this.blockSize * this.MEMORY_ACCESS_TIME) + this.CACHE_HIT_TIME + 1;
         } else {
             // Load-Through: requested word is sent directly to CPU while loading into cache
-            return this.MEMORY_ACCESS_TIME;
+            return this.MEMORY_ACCESS_TIME + 1;
         }
     }
 
     get averageMemoryAccessTime(): number {
         return (
-            this.hitRate * this.CACHE_HIT_TIME +
-            this.missRate * (this.CACHE_HIT_TIME + this.missPenalty)
+            (this.hitRate * this.CACHE_HIT_TIME) +
+            (this.missRate * this.missPenalty)
+            // Average time = (hC) + (1-h) * M
         );
     }
 
