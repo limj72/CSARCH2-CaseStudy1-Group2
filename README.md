@@ -83,33 +83,98 @@ For a given main memory block index $M$:
 
 ## Mathematical Timing & Metric Models
 
-### Required Statistical Outputs
-The simulation engine measures and computes all 7 required metrics:
+## Required Statistical Outputs
 
-1. **Total Access Count ($N$)**: Total memory access requests issued.
-2. **Cache Hit Count ($H$)**: Number of access requests satisfied by cache.
-3. **Cache Miss Count ($M$)**: Number of access requests that resulted in cache misses.
-4. **Cache Hit Rate**: 
-   $$\text{Hit Rate} = \frac{H}{N}$$
-5. **Cache Miss Rate**: 
-   $$\text{Miss Rate} = \frac{M}{N} = 1 - \text{Hit Rate}$$
-6. **Average Memory Access Time (AMAT)**:
-   $$\text{AMAT} = (T_{\text{hit}} \times \text{Hit Rate}) + (\text{Miss Penalty} \times \text{Miss Rate})$$
-7. **Total Memory Access Time**:
-   $$\text{Total Access Time} = \text{AMAT} \times N$$
+The simulation engine measures and computes the following seven required metrics:
 
-### Read Policy Miss Penalty Formulas
+1. **Total Access Count ($N$)**  
+   The total number of memory access requests issued.
 
-- **Non-Load-Through Policy**:
-  When a cache miss occurs, the CPU must wait while the entire main memory block ($B$ words) is transferred into the cache before reading the target word from cache.
-  $$\text{Miss Penalty}_{\text{Non-Load}} = T_{\text{hit}} + (B \times T_{\text{mem}}) + T_{\text{hit}}$$
-  *For $B = 4$ words, $T_{\text{hit}} = 1$, and $T_{\text{mem}} = 10$: $\text{Miss Penalty} = 1 + (4 \times 10) + 1 = 42\text{ cycles}$.*
+2. **Cache Hit Count ($H$)**  
+   The number of memory access requests successfully satisfied by the cache.
 
-- **Load-Through Policy**:
-  When a cache miss occurs, the requested word is forwarded directly from main memory to the CPU while the block is loaded into cache in parallel.
-  $$\text{Miss Penalty}_{\text{Load}} = T_{\text{hit}} + T_{\text{mem}}$$
-  *For $T_{\text{hit}} = 1$ and $T_{\text{mem}} = 10$: $\text{Miss Penalty} = 1 + 10 = 11\text{ cycles}$.*
+3. **Cache Miss Count ($M$)**  
+   The number of memory access requests that are not found in the cache.
 
+4. **Cache Hit Rate**
+
+   $$
+   \text{Hit Rate} = \frac{H}{N}
+   $$
+
+5. **Cache Miss Rate**
+
+   $$
+   \text{Miss Rate} = \frac{M}{N} = 1 - \text{Hit Rate}
+   $$
+
+6. **Average Memory Access Time (AMAT)**
+
+   $$
+   \text{AMAT}
+   =
+   \left(T_{\text{hit}} \times \text{Hit Rate}\right)
+   +
+   \left(\text{Miss Penalty} \times \text{Miss Rate}\right)
+   $$
+
+7. **Total Memory Access Time**
+
+   $$
+   \text{Total Access Time} = \text{AMAT} \times N
+   $$
+
+---
+
+## Read Policy Miss Penalty Formulas
+
+### Non-Load-Through Policy
+
+When a cache miss occurs, the CPU must wait for the entire memory block containing $B$ words to be transferred into the cache. Afterward, the requested word is read from the cache.
+
+The miss penalty is calculated as:
+
+$$
+\text{Miss Penalty}_{\text{Non-Load}}
+=
+T_{\text{hit}}
++
+\left(B \times T_{\text{mem}}\right)
++
+T_{\text{hit}}
+$$
+
+For a block size of $B = 4$ words, cache hit time of $T_{\text{hit}} = 1$ cycle, and main memory word access time of $T_{\text{mem}} = 10$ cycles:
+
+$$
+\text{Miss Penalty}_{\text{Non-Load}}
+=
+1 + (4 \times 10) + 1
+=
+42 \text{ cycles}
+$$
+
+### Load-Through Policy
+
+When a cache miss occurs, the requested word is sent directly from main memory to the CPU while the rest of the block is simultaneously transferred into the cache.
+
+The miss penalty is calculated as:
+
+$$
+\text{Miss Penalty}_{\text{Load}}
+=
+T_{\text{hit}} + T_{\text{mem}}
+$$
+
+For a cache hit time of $T_{\text{hit}} = 1$ cycle and a main memory word access time of $T_{\text{mem}} = 10$ cycles:
+
+$$
+\text{Miss Penalty}_{\text{Load}}
+=
+1 + 10
+=
+11 \text{ cycles}
+$$
 ---
 
 ## Detailed Analysis Write-up (LRU vs. MRU)
@@ -117,23 +182,42 @@ The simulation engine measures and computes all 7 required metrics:
 The following benchmark analysis compares **4-Way BSA + LRU** against **4-Way BSA + MRU** across the three standard test sequences with $n = 16$ cache blocks (4 sets of 4 ways each) and block size $B = 4$ words.
 
 ---
-
 ### Test Case A: Sequential Sequence
-- **Pattern Definition**: Access up to $2n = 32$ cache blocks ($0, 1, 2, \dots, 31$) and repeat the sequence twice (Total = 64 accesses).
-- **Working Set**: 32 distinct memory blocks mapping to 4 cache sets (8 blocks competing per set of 4 ways).
 
-#### Benchmark Results:
-| Policy | Read Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | AMAT (cycles) | Total Access Time (cycles) |
+- **Pattern Definition**: Access up to $2n = 32$ cache blocks ($0, 1, 2, \dots, 31$) and repeat the sequence twice.
+- **Total Accesses**: 64 memory block accesses.
+- **Working Set**: 32 distinct memory blocks mapped across 4 cache sets, with 8 different blocks competing for the 4 ways in each set.
+- **Configuration Used**:
+  - Block Size: 4 words
+  - Cache Blocks: 16 blocks
+  - Number of Sets: 4
+  - Main Memory Size: 1024 blocks
+
+#### Benchmark Results
+
+| Replacement Policy | Read Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | AMAT (cycles) | Total Access Time (cycles) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **LRU** | Load-Through | 64 | 0 | 64 | **0.00%** | **100.00%** | 11.00 | 704.00 |
 | **MRU** | Load-Through | 64 | 16 | 48 | **25.00%** | **75.00%** | 8.50 | 544.00 |
 | **LRU** | Non-Load-Through | 64 | 0 | 64 | **0.00%** | **100.00%** | 42.00 | 2,688.00 |
 | **MRU** | Non-Load-Through | 64 | 16 | 48 | **25.00%** | **75.00%** | 31.75 | 2,032.00 |
 
-#### Analysis:
-In the sequential access sequence, the working set size ($2n = 32$ blocks) exceeds total cache capacity ($n = 16$ blocks).
-- **LRU Behavior (0% Hit Rate — Complete Thrashing)**: LRU evicts the block that was accessed least recently. Because the access pattern is cyclic ($0 \dots 31, 0 \dots 31$), by the time the sequence loops back to block $0$, block $0$ was the first block evicted from Set 0. Consequently, every access in the second iteration results in a miss.
-- **MRU Behavior (25% Hit Rate)**: MRU evicts the block that was *most recently used*. When a set fills its 4 ways with blocks $0, 4, 8, 12$, subsequent misses evict only the 4th way slot ($12, 16, 20, \dots$). Thus, MRU protects the oldest items (ways 0, 1, 2) in each set. On the second pass, blocks $0, 4, 8$ are still resident in cache, producing hits on 3 out of every 4 initial set members ($25\%$ hit rate).
+#### LRU Simulation Output
+![alt text](screenshots/LRU_sequential.png)
+
+#### MRU Simulation Output
+![alt text](screenshots/MRU_sequential.png)
+
+#### Analysis
+
+The sequential access sequence uses a working set of $2n = 32$ blocks, which is twice the cache capacity of $n = 16$ blocks.
+
+- **LRU Behavior — 0.00% Hit Rate**: LRU removes the block that has not been accessed for the longest time. During the first pass from block $0$ to block $31$, the earlier blocks are gradually removed from the cache. When the sequence returns to block $0$ during the second pass, it is no longer available in the cache. The same behavior continues for every block, causing complete cache thrashing and producing 64 misses.
+
+- **MRU Behavior — 25.00% Hit Rate**: MRU removes the most recently accessed block whenever a set is full. For example, blocks $0$, $4$, $8$, and $12$ initially fill Set 0. When another block mapped to Set 0 is accessed, MRU removes the most recently inserted block while preserving older blocks. As a result, several early blocks remain in the cache and produce 16 hits during the second pass.
+
+- **Read Policy Comparison**: Load-Through and Non-Load-Through produce the same number of hits and misses because the read policy does not affect cache replacement. However, Non-Load-Through has a higher miss penalty because the entire block must be transferred before the requested word can be accessed.
+
 
 ---
 
