@@ -166,6 +166,14 @@ body::before {
   border: 1px solid var(--border);
 }
 
+.badge-scrollable {
+  color: #042f2e;
+  background: var(--accent-mint);
+  border: 1px solid var(--accent);
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+}
+
 /* --- Section Titles with Inline SVG Icons --- */
 .section-title {
   font-size: 1rem;
@@ -220,7 +228,7 @@ body::before {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
   gap: 16px;
-  align-items: stretch;
+  align-items: start;
 }
 
 @media (max-width: 1100px) {
@@ -324,9 +332,15 @@ button.btn-primary:active {
 
 /* --- Dedicated Playback Toolbar --- */
 .playback-card {
+  position: sticky;
+  top: 12px;
+  z-index: 100;
   border-color: var(--glass-border-hover);
-  background: rgba(18, 30, 24, 0.85);
+  background: rgba(13, 22, 17, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   padding: 14px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 25px rgba(16, 185, 129, 0.12);
 }
 
 .playback-bar {
@@ -602,11 +616,13 @@ button.btn-play-toggle:hover {
   margin-bottom: 10px;
 }
 
-/* --- Cache Snapshot Grid (NO INNER SCROLL, ALL SETS VISIBLE AT A GLANCE) --- */
+/* --- Cache Snapshot Grid --- */
 .cache-grid-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
   margin-bottom: 12px;
 }
 
@@ -614,7 +630,11 @@ button.btn-play-toggle:hover {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  /* Removed max-height & scrollbar so all sets are visible at once without scrolling inside */
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-elevated) transparent;
 }
 
 .cache-set-row {
@@ -698,6 +718,14 @@ button.btn-play-toggle:hover {
   margin-top: 1px;
 }
 
+.way-block .word-range {
+  font-size: 0.62rem;
+  color: var(--accent-light);
+  opacity: 0.9;
+  margin-top: 1px;
+  font-family: var(--font-mono);
+}
+
 .way-block .valid-badge {
   display: inline-block;
   font-size: 0.6rem;
@@ -719,7 +747,7 @@ button.btn-play-toggle:hover {
 
 /* --- Trace Log Table (Matches total height cleanly) --- */
 .trace-container {
-  max-height: 480px;
+  max-height: 520px;
   overflow-y: auto;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
@@ -797,6 +825,64 @@ button.btn-play-toggle:hover {
   background: var(--miss-bg);
   color: var(--miss);
   border: 1px solid var(--miss-border);
+}
+
+/* --- Visible Scroll Hint Footer --- */
+.scroll-hint-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-mint);
+  background: var(--accent-dim);
+  border: 1px dashed var(--glass-border-hover);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.scroll-hint-footer svg {
+  color: var(--accent-mint);
+  animation: bounce-subtle 1.5s infinite ease-in-out;
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2px); }
+}
+
+/* --- Prominent Custom Scrollbars --- */
+.cache-set-list::-webkit-scrollbar,
+.trace-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cache-set-list::-webkit-scrollbar-track,
+.trace-container::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+  border-radius: 4px;
+}
+
+.cache-set-list::-webkit-scrollbar-thumb,
+.trace-container::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+  border: 1px solid var(--glass-border);
+}
+
+.cache-set-list::-webkit-scrollbar-thumb:hover,
+.trace-container::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-mint);
+}
+
+.cache-set-list,
+.trace-container {
+  scrollbar-width: auto;
+  scrollbar-color: var(--accent) var(--bg-surface);
 }
 
 /* --- Layout Sections Spacing --- */

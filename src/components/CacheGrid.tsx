@@ -1,15 +1,29 @@
+import { useEffect, useRef } from "react";
 import CacheSet from "../simulator/CacheSet";
 import type { AccessResult } from "../types/AccessResult";
 
 interface CacheGridProps {
     cacheState: CacheSet[];
     activeResult?: AccessResult;
+    blockSize?: number;
 }
 
 export default function CacheGrid({
     cacheState,
     activeResult,
+    blockSize,
 }: CacheGridProps) {
+    const activeSetRef = useRef<HTMLDivElement | null>(null);
+
+    // Auto-scroll active targeted set into view inside cache-set-list container
+    useEffect(() => {
+        if (activeResult !== undefined && activeSetRef.current) {
+            activeSetRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+            });
+        }
+    }, [activeResult?.setIndex]);
 
     return (
         <div className="cache-grid-container">
@@ -23,8 +37,8 @@ export default function CacheGrid({
                     Cache Memory Visual Snapshot (4-Way BSA)
                 </h2>
                 {cacheState.length > 0 && (
-                    <div className="badge badge-outline">
-                        {cacheState.length} Sets • 4 Ways / Set
+                    <div className={cacheState.length > 4 ? "badge badge-scrollable" : "badge badge-outline"} title="Scroll inside container to view all sets">
+                        {cacheState.length} Sets • 4 Ways {cacheState.length > 4 ? "• ↕ Scrollable" : ""}
                     </div>
                 )}
             </div>
@@ -39,56 +53,77 @@ export default function CacheGrid({
                     <p>Run a simulation to inspect live cache block tags & states</p>
                 </div>
             ) : (
-                <div className="cache-set-list">
-                    {cacheState.map((set, setIndex) => {
-                        const isSetTargeted = activeResult?.setIndex === setIndex;
+                <>
+                    <div className="cache-set-list">
+                        {cacheState.map((set, setIndex) => {
+                            const isSetTargeted = activeResult?.setIndex === setIndex;
 
-                        return (
-                            <div
-                                key={setIndex}
-                                className={`cache-set-row ${isSetTargeted ? "active-set" : ""}`}
-                            >
-                                <div className="cache-set-row-header">
-                                    <span className={`set-pill ${isSetTargeted ? "targeted-pill" : ""}`}>
-                                        SET {setIndex} {isSetTargeted ? "← ACCESSED" : ""}
-                                    </span>
+                            return (
+                                <div
+                                    key={setIndex}
+                                    ref={isSetTargeted ? activeSetRef : null}
+                                    className={`cache-set-row ${isSetTargeted ? "active-set" : ""}`}
+                                >
+                                    <div className="cache-set-row-header">
+                                        <span className={`set-pill ${isSetTargeted ? "targeted-pill" : ""}`}>
+                                            SET {setIndex} {isSetTargeted ? "← ACCESSED" : ""}
+                                        </span>
+                                    </div>
+
+                                    <div className="ways-grid">
+                                        {set.blocks.map((block, way) => {
+                                            const isWayTargeted = isSetTargeted && activeResult?.way === way;
+
+                                            return (
+                                                <div
+                                                    key={way}
+                                                    className={`way-block ${block.valid ? "occupied" : "empty"} ${
+                                                        isWayTargeted
+                                                            ? activeResult?.hit ? "active-way-hit" : "active-way-miss"
+                                                            : ""
+                                                    }`}
+                                                >
+                                                    <div className="way-num">Way {way}</div>
+                                                    {block.valid ? (
+                                                        <>
+                                                            <div className="tag-val">Tag: {block.tag}</div>
+                                                            <div className="mem-val">Block #{block.memoryBlock}</div>
+                                                            {blockSize && block.memoryBlock !== null && (
+                                                                <div className="word-range">
+                                                                    W{block.memoryBlock * blockSize}–W{(block.memoryBlock + 1) * blockSize - 1}
+                                                                </div>
+                                                            )}
+                                                            <div className="valid-badge">VALID</div>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <div className="tag-val" style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>—</div>
+                                                            <div className="mem-val" style={{ opacity: 0.5 }}>Empty</div>
+                                                            {blockSize && (
+                                                                <div className="word-range" style={{ opacity: 0.3 }}>—</div>
+                                                            )}
+                                                            <div className="valid-badge">INVALID</div>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
+                            );
+                        })}
+                    </div>
 
-                                <div className="ways-grid">
-                                    {set.blocks.map((block, way) => {
-                                        const isWayTargeted = isSetTargeted && activeResult?.way === way;
-
-                                        return (
-                                            <div
-                                                key={way}
-                                                className={`way-block ${block.valid ? "occupied" : "empty"} ${
-                                                    isWayTargeted
-                                                        ? activeResult?.hit ? "active-way-hit" : "active-way-miss"
-                                                        : ""
-                                                }`}
-                                            >
-                                                <div className="way-num">Way {way}</div>
-                                                {block.valid ? (
-                                                    <>
-                                                        <div className="tag-val">Tag: {block.tag}</div>
-                                                        <div className="mem-val">Block #{block.memoryBlock}</div>
-                                                        <div className="valid-badge">VALID</div>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <div className="tag-val" style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>—</div>
-                                                        <div className="mem-val" style={{ opacity: 0.5 }}>Empty</div>
-                                                        <div className="valid-badge">INVALID</div>
-                                                    </>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
+                    {cacheState.length > 4 && (
+                        <div className="scroll-hint-footer">
+                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2">
+                                <polyline points="7 13 12 18 17 13"></polyline>
+                                <polyline points="7 6 12 11 17 6"></polyline>
+                            </svg>
+                            <span>Scroll inside container above to view all {cacheState.length} sets</span>
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );

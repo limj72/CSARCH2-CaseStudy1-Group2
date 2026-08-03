@@ -247,7 +247,7 @@ export default function ControlPanel() {
 
                             {activeTraceResult && (
                                 <div className="step-info-pill">
-                                    <span>Accessing Block <strong>#{activeTraceResult.memoryBlock}</strong></span>
+                                    <span>Accessing Block <strong>#{activeTraceResult.memoryBlock}</strong> <span style={{ opacity: 0.7, fontSize: "0.75rem" }}>(Words W{activeTraceResult.memoryBlock * blockSize}–W{(activeTraceResult.memoryBlock + 1) * blockSize - 1})</span></span>
                                     <span className="dot">•</span>
                                     <span>Set {activeTraceResult.setIndex}</span>
                                     <span className="dot">•</span>
@@ -398,6 +398,7 @@ export default function ControlPanel() {
                     <CacheGrid
                         cacheState={currentStep?.cacheState ?? []}
                         activeResult={viewMode === "step" ? activeTraceResult : undefined}
+                        blockSize={blockSize}
                     />
                 </div>
 

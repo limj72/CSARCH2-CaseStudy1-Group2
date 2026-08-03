@@ -31,10 +31,11 @@ An interactive, web-based **Cache Memory Simulator** designed for CSARCH2 (Compu
 
 ### Setup & Running Instructions
 
-1. **Navigate into the application directory**:
+1. **Navigate to the project root directory**:
    ```bash
-   cd cache-simulator
+   cd CSARCH2-CaseStudy1-Group2
    ```
+   *(Or `cd ..` if you are currently inside `cache-simulator/`)*
 
 2. **Install project dependencies**:
    ```bash
@@ -47,11 +48,11 @@ An interactive, web-based **Cache Memory Simulator** designed for CSARCH2 (Compu
    ```
 
 4. **Access the application**:
-   Open your web browser and navigate to `http://localhost:5173`.
+   Open your web browser and navigate to `http://localhost:5173/CSARCH2-CaseStudy1-Group2/`.
 
 ### Build & Utility Commands
 
-Inside `cache-simulator/`:
+From the project root:
 - `npm run dev`: Launches local development server with HMR.
 - `npm run build`: Compiles TypeScript and builds production assets into `dist/`.
 - `npm run preview`: Previews the production build locally.
