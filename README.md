@@ -84,42 +84,34 @@ For a given main memory block index $M$:
 ## Mathematical Timing & Metric Models
 
 ### Required Statistical Outputs
+
 The simulation engine measures and computes all 7 required metrics:
-1. **Total Access Count ($N$)**: Total memory access requests issued.
-2. **Cache Hit Count ($H$)**: Number of access requests satisfied by cache.
-3. **Cache Miss Count ($M$)**: Number of access requests that resulted in cache misses.
-4. **Cache Hit Rate**: 
-$$
-\text{Hit Rate} = \frac{H}{N}
-$$
-5. **Cache Miss Rate**: 
-$$
-\text{Miss Rate} = \frac{M}{N} = 1 - \text{Hit Rate}
-$$
-6. **Average Memory Access Time (AMAT)**:
-$$
-\text{AMAT} = (T_{\text{hit}} \times \text{Hit Rate}) + (\text{Miss Penalty} \times \text{Miss Rate})
-$$
-7. **Total Memory Access Time**:
-$$
-\text{Total Access Time} = \text{AMAT} \times N
-$$
+
+1. **Total Access Count** ($N$): Total memory access requests issued.
+2. **Cache Hit Count** ($H$): Number of access requests satisfied by cache.
+3. **Cache Miss Count** ($M$): Number of access requests that resulted in cache misses.
+4. **Cache Hit Rate**: $\text{Hit Rate}=\frac{H}{N}$
+5. **Cache Miss Rate**: $\text{Miss Rate}=\frac{M}{N}=1-\text{Hit Rate}$
+6. **Average Memory Access Time (AMAT)**: $\text{AMAT}=(T_{\text{hit}}\times\text{Hit Rate})+(\text{Miss Penalty}\times\text{Miss Rate})$
+7. **Total Memory Access Time**: $\text{Total Access Time}=\text{AMAT}\times N$
 
 ---
 
 ### Read Policy Miss Penalty Formulas
+
 * **Non-Load-Through Policy**:
   When a cache miss occurs, the CPU must wait while the entire main memory block ($B$ words) is transferred into the cache before reading the target word from cache.
-$$
-\text{Miss Penalty}_{\text{Non-Load}} = T_{\text{hit}} + (B \times T_{\text{mem}}) + T_{\text{hit}}
-$$
-> *For $B = 4$ words, $T_{\text{hit}} = 1$, and $T_{\text{mem}} = 10$: $\text{Miss Penalty} = 1 + (4 \times 10) + 1 = 42\text{ cycles}$.*
+  
+  $$\text{Miss Penalty}_{\text{Non-Load}}=T_{\text{hit}}+(B\times T_{\text{mem}})+T_{\text{hit}}$$
+
+> *For $B=4$ words, $T_{\text{hit}}=1$, and $T_{\text{mem}}=10$: $\text{Miss Penalty}=1+(4\times10)+1=42\text{ cycles}$.*
+
 * **Load-Through Policy**:
   When a cache miss occurs, the requested word is forwarded directly from main memory to the CPU while the block is loaded into cache in parallel.
-$$
-\text{Miss Penalty}_{\text{Load}} = T_{\text{hit}} + T_{\text{mem}}
-$$
-> *For $T_{\text{hit}} = 1$ and $T_{\text{mem}} = 10$: $\text{Miss Penalty} = 1 + 10 = 11\text{ cycles}$.*
+  
+  $$\text{Miss Penalty}_{\text{Load}}=T_{\text{hit}}+T_{\text{mem}}$$
+
+> *For $T_{\text{hit}}=1$ and $T_{\text{mem}}=10$: $\text{Miss Penalty}=1+10=11\text{ cycles}$.*
 ---
 
 ## Detailed Analysis Write-up (LRU vs. MRU)
