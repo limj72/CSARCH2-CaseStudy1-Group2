@@ -1,11 +1,15 @@
 # CSARCH2 Case Study 1: Machine 7 Cache Memory Simulator
+
+## Deployed Link: https://limj72.github.io/CSARCH2-CaseStudy1-Group2/
+## Youtube Link: 
+
 > **Machine 7 Configuration:** 4-Way Block Set Associative (BSA) — **LRU vs. MRU Replacement Policies**
 
 An interactive, web-based **Cache Memory Simulator** designed for CSARCH2 (Computer Architecture 2). This application simulates a **4-Way Block Set Associative (BSA)** cache memory system comparing **Least Recently Used (LRU)** and **Most Recently Used (MRU)** replacement policies, featuring real-time state visualization, step-by-step trace execution, and detailed timing statistics.
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 1. [Quick Start Guide](#-quick-start-guide)
 2. [Machine 7 Full Specifications & Parameters](#-machine-7-full-specifications--parameters)
 3. [Mathematical Timing & Metric Models](#-mathematical-timing--metric-models)
@@ -19,7 +23,7 @@ An interactive, web-based **Cache Memory Simulator** designed for CSARCH2 (Compu
 
 ---
 
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
 ### Prerequisites
 - **Node.js** (v18.0.0 or higher recommended)
@@ -55,7 +59,7 @@ Inside `cache-simulator/`:
 
 ---
 
-## 🛠️ Machine 7 Full Specifications & Parameters
+## Machine 7 Full Specifications & Parameters
 
 | Parameter | Specification / Value | Description |
 | :--- | :--- | :--- |
@@ -77,7 +81,7 @@ For a given main memory block index $M$:
 
 ---
 
-## 📐 Mathematical Timing & Metric Models
+## Mathematical Timing & Metric Models
 
 ### Required Statistical Outputs
 The simulation engine measures and computes all 7 required metrics:
@@ -108,7 +112,7 @@ The simulation engine measures and computes all 7 required metrics:
 
 ---
 
-## 📊 Detailed Analysis Write-up (LRU vs. MRU)
+## Detailed Analysis Write-up (LRU vs. MRU)
 
 The following benchmark analysis compares **4-Way BSA + LRU** against **4-Way BSA + MRU** across the three standard test sequences with $n = 16$ cache blocks (4 sets of 4 ways each) and block size $B = 4$ words.
 
@@ -171,7 +175,7 @@ With 1024 possible main memory blocks and only 16 cache blocks, uniformly random
 
 ---
 
-### 💡 Comparative Summary & Architectural Insights
+### Comparative Summary & Architectural Insights
 
 1. **Cyclic Working Sets & Belady's Anomaly**:
    When the active working set exceeds cache capacity ($2n > n$), **LRU exhibits worst-case performance (0% hit rate)** due to cyclic thrashing. **MRU preserves an upper bound hit rate of $\approx 25\% - 42.5\%$** by protecting early set ways from eviction.
@@ -182,7 +186,7 @@ With 1024 possible main memory blocks and only 16 cache blocks, uniformly random
 
 ---
 
-## ✨ System Features & User Guide
+## System Features & User Guide
 
 - **Visual Cache Inspector**: View live grid states of all cache sets, ways, tags, valid bits, and block contents.
 - **Trace Execution Modes**: Toggle between **Final Snapshot** or step-by-step **Animated Trace** with step navigation controls (Previous / Next).
@@ -191,7 +195,7 @@ With 1024 possible main memory blocks and only 16 cache blocks, uniformly random
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 CSARCH2-CaseStudy1-Group2/
