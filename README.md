@@ -102,16 +102,20 @@ The simulation engine measures and computes all 7 required metrics:
 * **Non-Load-Through Policy**:
   When a cache miss occurs, the CPU must wait while the entire main memory block ($B$ words) is transferred into the cache before reading the target word from cache.
   
-  $$\text{Miss Penalty}_{\text{Non-Load}}=T_{\text{hit}}+(B\times T_{\text{mem}})+T_{\text{hit}}$$
+  $$
+  \text{Miss Penalty}_{\text{Non-Load}} = T_{\text{hit}} + (B \times T_{\text{mem}}) + T_{\text{hit}}
+  $$
 
-> *For $B=4$ words, $T_{\text{hit}}=1$, and $T_{\text{mem}}=10$: $\text{Miss Penalty}=1+(4\times10)+1=42\text{ cycles}$.*
+> For $B = 4$ words, $T_{\text{hit}} = 1$, and $T_{\text{mem}} = 10$: $\text{Miss Penalty} = 1 + (4 \times 10) + 1 = 42\text{ cycles}$.
 
 * **Load-Through Policy**:
   When a cache miss occurs, the requested word is forwarded directly from main memory to the CPU while the block is loaded into cache in parallel.
   
-  $$\text{Miss Penalty}_{\text{Load}}=T_{\text{hit}}+T_{\text{mem}}$$
+  $$
+  \text{Miss Penalty}_{\text{Load}} = T_{\text{hit}} + T_{\text{mem}}
+  $$
 
-> *For $T_{\text{hit}}=1$ and $T_{\text{mem}}=10$: $\text{Miss Penalty}=1+10=11\text{ cycles}$.*
+> For $T_{\text{hit}} = 1$ and $T_{\text{mem}} = 10$: $\text{Miss Penalty} = 1 + 10 = 11\text{ cycles}$.
 ---
 
 ## Detailed Analysis Write-up (LRU vs. MRU)
@@ -159,24 +163,46 @@ The sequential access sequence uses a working set of $2n = 32$ blocks, which is 
 ---
 
 ### Test Case B: Mid-Repeat Sequence
-- **Pattern Definition**: 
-  1. Access $0 \dots n-1$ ($0 \dots 15$)
-  2. Repeat $0 \dots 2n-1$ ($0 \dots 31$) twice
-  3. Access $n-1 \dots 0$ ($15 \dots 0$) in reverse
-  4. Repeat $2n-1 \dots 0$ ($31 \dots 0$) twice (Total = 160 accesses).
 
-#### Benchmark Results:
-| Policy | Read Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | AMAT (cycles) | Total Access Time (cycles) |
+- **Pattern Definition**:
+  1. Access blocks $0$ to $n-1$ or $0$ to $15$.
+  2. Access blocks $0$ to $2n-1$ or $0$ to $31$ twice.
+  3. Access blocks $n-1$ to $0$ or $15$ to $0$ in reverse.
+  4. Access blocks $2n-1$ to $0$ or $31$ to $0$ twice.
+- **Total Accesses**: 160 memory block accesses.
+- **Working Set**: The pattern alternates between a 16-block working set and a larger 32-block working set while also changing the direction of access.
+- **Configuration Used**:
+  - Block Size: 4 words
+  - Cache Blocks: 16 blocks
+  - Number of Sets: 4
+  - Main Memory Size: 1024 blocks
+
+#### Benchmark Results
+
+| Replacement Policy | Read Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | AMAT (cycles) | Total Access Time (cycles) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **LRU** | Load-Through | 160 | 16 | 144 | **10.00%** | **90.00%** | 10.00 | 1,600.00 |
 | **MRU** | Load-Through | 160 | 68 | 92 | **42.50%** | **57.50%** | 6.75 | 1,080.00 |
 | **LRU** | Non-Load-Through | 160 | 16 | 144 | **10.00%** | **90.00%** | 37.90 | 6,064.00 |
 | **MRU** | Non-Load-Through | 160 | 68 | 92 | **42.50%** | **57.50%** | 24.57 | 3,932.00 |
 
-#### Analysis:
-The Mid-Repeat sequence combines forward loops, reverse loops, and working-set expansions.
-- **LRU Performance (10.00% Hit Rate)**: LRU experiences severe thrashing during the repeated $2n$ loops. Hits only occur during transitions when reversing access direction immediately after an access.
-- **MRU Performance (42.50% Hit Rate)**: MRU significantly outperforms LRU. By pinning early elements in cache and continually churning only the most recently inserted way, MRU retains high spatial and temporal stability across repeated sub-sequences and reverse traversals.
+#### LRU Simulation Output
+![alt text](screenshots/LRU_MidRep.png)
+
+#### MRU Simulation Output
+![alt text](screenshots/MRU_MidRep.png)
+
+#### Analysis
+
+The Mid-Repeat sequence contains forward repetitions, reverse repetitions, and changes in the size of the active working set.
+
+- **LRU Behavior — 10.00% Hit Rate**: LRU performs poorly during the repeated $0$ to $31$ sequences because the 32-block working set exceeds the 16-block cache capacity. Most earlier blocks are removed before they are accessed again. Some hits occur when the sequence changes direction because recently accessed blocks may still be available in the cache.
+
+- **MRU Behavior — 42.50% Hit Rate**: MRU performs better because it repeatedly removes the newest block in a full set while allowing older blocks to remain. These retained blocks are accessed again during the repeated and reversed portions of the sequence, resulting in 68 cache hits.
+
+- **Policy Comparison**: MRU achieves 52 more hits than LRU and reduces the total Load-Through access time from 1,600 cycles to 1,080 cycles. This shows that MRU is more suitable for this specific repeated and reversing access pattern.
+
+- **Read Policy Comparison**: The hit and miss counts remain unchanged between the two read policies. The difference appears only in AMAT and total access time because Non-Load-Through has a substantially higher miss penalty.
 
 ---
 
