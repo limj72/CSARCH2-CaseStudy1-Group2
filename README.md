@@ -207,18 +207,52 @@ The Mid-Repeat sequence contains forward repetitions, reverse repetitions, and c
 ---
 
 ### Test Case C: Random Sequence
-- **Pattern Definition**: 64 random memory block accesses within the address space $0 \dots 1023$.
 
-#### Benchmark Results:
-| Policy | Read Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | AMAT (cycles) | Total Access Time (cycles) |
+- **Pattern Definition**: Generate 64 random memory block accesses within the valid main memory range of block $0$ to block $1023$.
+- **Total Accesses**: 64 memory block accesses per simulation.
+- **Working Set**: Randomly selected blocks from 1024 possible main memory blocks.
+- **Configuration Used**:
+  - Block Size: 4 words
+  - Cache Blocks: 16 blocks
+  - Number of Sets: 4
+  - Associativity: 4 ways per set
+  - Read Policy: Load-Through
+  - Main Memory Size: 1024 blocks
+
+#### Benchmark Results
+
+For this test case, Load-Through was selected as the common read policy so that the analysis could focus on the behavior of the LRU and MRU replacement policies.
+
+| Replacement Policy | Read Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | AMAT (cycles) | Total Access Time (cycles) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **LRU** | Load-Through | 64 | 0 | 64 | **0.00%** | **100.00%** | 11.00 | 704.00 |
-| **MRU** | Load-Through | 64 | 1 | 63 | **1.56%** | **98.44%** | 10.84 | 694.00 |
-| **LRU** | Non-Load-Through | 64 | 0 | 64 | **0.00%** | **100.00%** | 42.00 | 2,688.00 |
-| **MRU** | Non-Load-Through | 64 | 1 | 63 | **1.56%** | **98.44%** | 41.36 | 2,647.00 |
+| **MRU** | Load-Through | 64 | 2 | 62 | **3.13%** | **96.88%** | 10.69 | 684.00 |
 
-#### Analysis:
-With 1024 possible main memory blocks and only 16 cache blocks, uniformly random accesses exhibit very low temporal locality. Both policies experience high miss rates ($\approx 98\% - 100\%$). However, MRU occasionally catches accidental re-references to older blocks retained in lower way indices.
+#### LRU Simulation Output
+
+![alt text](screenshots/LRU_Random.png)
+
+#### MRU Simulation Output
+
+![alt text](screenshots/MRU_Random.png)
+
+#### Analysis
+
+The random test accesses memory blocks from a large address space of 1024 blocks while the cache can store only 16 blocks. Because the accessed blocks are selected randomly, the sequence generally has very low temporal locality. Most blocks are not accessed again before they are replaced, resulting in a high cache miss rate for both replacement policies.
+
+- **LRU Behavior — 0.00% Hit Rate**: The LRU run produced 64 cache misses and no cache hits. None of the randomly accessed blocks were found in the cache when they were requested again. As a result, every request required a main memory access, producing an AMAT of 11.00 cycles and a total access time of 704 cycles.
+
+- **MRU Behavior — 3.13% Hit Rate**: The MRU run produced 2 cache hits and 62 cache misses. The two hits indicate that some blocks were randomly accessed again while they were still present in the cache. This slightly reduced the AMAT to 10.69 cycles and the total access time to 684 cycles.
+
+- **Observed Performance Difference**: In these particular simulation runs, MRU recorded two more cache hits than LRU and completed the sequence 20 cycles faster. However, the LRU and MRU simulations used different randomly generated access sequences. Therefore, the difference cannot be attributed entirely to the replacement policies. It may also have resulted from the MRU sequence containing more repeated block accesses.
+
+- **Random Access Behavior**: Both policies still produced miss rates above 96%, showing that neither LRU nor MRU performs particularly well when memory accesses have little temporal locality and are spread across a much larger memory space than the cache capacity.
+
+#### Limitation of the Random Comparison
+
+The simulator generates a new random sequence each time the **Run Simulation** button is pressed. Consequently, the LRU and MRU results shown above were produced using different memory access sequences.
+
+For a fully controlled comparison, both replacement policies should be tested using the exact same 64-block random sequence. The current results should therefore be interpreted as separate demonstrations of LRU and MRU behavior under random access rather than a direct policy-to-policy comparison.
 
 ---
 
