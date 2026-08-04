@@ -145,20 +145,15 @@ The following benchmark analysis compares **4-Way BSA + LRU** against **4-Way BS
 | **LRU** | Non-Load-Through | 64 | 0 | 64 | **0.00%** | **100.00%** | 42.00 | 2,688.00 |
 | **MRU** | Non-Load-Through | 64 | 16 | 48 | **25.00%** | **75.00%** | 31.75 | 2,032.00 |
 
-#### LRU Simulation Output
-![alt text](screenshots/LRU_sequential.png)
-
-#### MRU Simulation Output
-![alt text](screenshots/MRU_sequential.png)
+#### LRU vs. MRU Simulation Output
+![alt text](screenshots/LRU_MRU_Seq.png)
 
 #### Analysis
 
 The sequential access sequence uses a working set of $2n = 32$ blocks, which is twice the cache capacity of $n = 16$ blocks.
 
 - **LRU Behavior — 0.00% Hit Rate**: LRU removes the block that has not been accessed for the longest time. During the first pass from block $0$ to block $31$, the earlier blocks are gradually removed from the cache. When the sequence returns to block $0$ during the second pass, it is no longer available in the cache. The same behavior continues for every block, causing complete cache thrashing and producing 64 misses.
-
 - **MRU Behavior — 25.00% Hit Rate**: MRU removes the most recently accessed block whenever a set is full. For example, blocks $0$, $4$, $8$, and $12$ initially fill Set 0. When another block mapped to Set 0 is accessed, MRU removes the most recently inserted block while preserving older blocks. As a result, several early blocks remain in the cache and produce 16 hits during the second pass.
-
 - **Read Policy Comparison**: Load-Through and Non-Load-Through produce the same number of hits and misses because the read policy does not affect cache replacement. However, Non-Load-Through has a higher miss penalty because the entire block must be transferred before the requested word can be accessed.
 
 
@@ -188,22 +183,16 @@ The sequential access sequence uses a working set of $2n = 32$ blocks, which is 
 | **LRU** | Non-Load-Through | 160 | 16 | 144 | **10.00%** | **90.00%** | 37.90 | 6,064.00 |
 | **MRU** | Non-Load-Through | 160 | 68 | 92 | **42.50%** | **57.50%** | 24.57 | 3,932.00 |
 
-#### LRU Simulation Output
-![alt text](screenshots/LRU_MidRep.png)
-
-#### MRU Simulation Output
-![alt text](screenshots/MRU_MidRep.png)
+#### LRU vs. MRU Simulation Output
+![alt text](screenshots/LRU_MRU_MIDREP.png)
 
 #### Analysis
 
 The Mid-Repeat sequence contains forward repetitions, reverse repetitions, and changes in the size of the active working set.
 
 - **LRU Behavior — 10.00% Hit Rate**: LRU performs poorly during the repeated $0$ to $31$ sequences because the 32-block working set exceeds the 16-block cache capacity. Most earlier blocks are removed before they are accessed again. Some hits occur when the sequence changes direction because recently accessed blocks may still be available in the cache.
-
 - **MRU Behavior — 42.50% Hit Rate**: MRU performs better because it repeatedly removes the newest block in a full set while allowing older blocks to remain. These retained blocks are accessed again during the repeated and reversed portions of the sequence, resulting in 68 cache hits.
-
 - **Policy Comparison**: MRU achieves 52 more hits than LRU and reduces the total Load-Through access time from 1,600 cycles to 1,080 cycles. This shows that MRU is more suitable for this specific repeated and reversing access pattern.
-
 - **Read Policy Comparison**: The hit and miss counts remain unchanged between the two read policies. The difference appears only in AMAT and total access time because Non-Load-Through has a substantially higher miss penalty.
 
 ---
@@ -213,15 +202,6 @@ The Mid-Repeat sequence contains forward repetitions, reverse repetitions, and c
 - **Pattern Definition**: Generate 64 random memory block accesses within the valid main memory range of block 0 to block 1023.
 - **Total Accesses**: 64 memory block accesses.
 - **Working Set**: Randomly selected blocks from 1024 possible main memory blocks.
-- **Configuration Used**:
-  - Visualization Mode: Final Memory Snapshot
-  - Policy Selection: Compare Both LRU and MRU Side-by-Side
-  - Block Size: 4 words
-  - Cache Blocks: 16 blocks
-  - Number of Sets: 4
-  - Associativity: 4 ways per set
-  - Read Policy: Load-Through
-  - Main Memory Size: 1024 blocks
 
 #### Benchmark Results
 
