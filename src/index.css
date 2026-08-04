@@ -1095,3 +1095,327 @@ button.btn-play-toggle:hover {
 .section-margin {
   margin-bottom: 20px;
 }
+
+/* --- Export / Print PDF Button --- */
+.btn-print-report {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  border: 2px solid var(--text-primary) !important;
+  border-radius: var(--radius-sm);
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+}
+
+.btn-print-report:hover {
+  background: #f13c37 !important;
+  transform: translate(-1px, -1px);
+}
+
+/* --- PDF Report Modal Styling --- */
+.pdf-modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.pdf-modal-container {
+  background: var(--bg-surface);
+  border: 4px solid var(--text-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 960px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pdf-modal-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: var(--accent-light);
+  border-bottom: 3px solid var(--text-primary);
+}
+
+.pdf-toolbar-title {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.pdf-toolbar-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-pdf-print {
+  background: var(--accent);
+  color: #fff;
+  border: 2px solid var(--text-primary);
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.btn-pdf-close {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 2px solid var(--text-primary);
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.printable-academic-document {
+  padding: 24px;
+  overflow-y: auto;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-family: var(--font-sans);
+}
+
+.doc-header-block {
+  border-bottom: 3px double #000000;
+  padding-bottom: 12px;
+  margin-bottom: 18px;
+}
+
+.doc-meta-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #555;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.doc-title-input {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #000000;
+  border: none;
+  border-bottom: 1px dashed #ccc;
+  background: transparent;
+  margin-bottom: 6px;
+  outline: none;
+}
+
+.doc-author-row {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.doc-author-input {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 1px 6px;
+  width: 120px;
+}
+
+.doc-section {
+  margin-bottom: 20px;
+}
+
+.doc-section-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #000000;
+  border-left: 4px solid var(--accent);
+  padding-left: 8px;
+  margin-bottom: 8px;
+}
+
+.doc-spec-table,
+.doc-compare-table,
+.doc-trace-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  margin-bottom: 8px;
+}
+
+.doc-spec-table td,
+.doc-compare-table th,
+.doc-compare-table td,
+.doc-trace-table th,
+.doc-trace-table td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.doc-compare-table th,
+.doc-trace-table th {
+  background: #f4f4f4;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: #000;
+}
+
+.doc-trace-table td {
+  text-align: center;
+}
+
+.doc-trace-table td.tag-hit {
+  color: #16a34a;
+  font-weight: 800;
+}
+
+.doc-trace-table td.tag-miss {
+  color: #dc2626;
+  font-weight: 800;
+}
+
+.doc-snapshot-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.doc-snapshot-col {
+  width: 100%;
+}
+
+.doc-col-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.doc-snapshot-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.doc-snapshot-table th,
+.doc-snapshot-table td {
+  border: 1px solid #ddd;
+  padding: 5px 8px;
+  text-align: center;
+}
+
+.doc-snapshot-table th {
+  background: #f4f4f4;
+  font-weight: 800;
+}
+
+.doc-snapshot-table td.cell-occupied {
+  background: #f0fdf4;
+}
+
+.doc-snapshot-table td.cell-empty {
+  background: #fafafa;
+}
+
+.doc-footer {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+  margin-top: 20px;
+  font-size: 0.7rem;
+  color: #777;
+  font-weight: 600;
+}
+
+/* --- Print PDF Media Override when Modal Open --- */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body.pdf-modal-open #root {
+    display: none !important;
+  }
+
+  .pdf-modal-overlay {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    background: transparent !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .pdf-modal-container {
+    border: none !important;
+    box-shadow: none !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  .pdf-modal-toolbar {
+    display: none !important;
+  }
+
+  .printable-academic-document {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .doc-title-input,
+  .doc-author-input {
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .doc-section,
+  .doc-spec-table,
+  .doc-compare-table,
+  .doc-trace-table,
+  .doc-snapshot-col {
+    break-inside: auto !important;
+  }
+
+  .doc-trace-table tr,
+  .doc-snapshot-table tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}

@@ -48,9 +48,11 @@ export default function CacheGrid({
                             className="badge"
                             style={{
                                 marginLeft: "0.6rem",
-                                background: accentColor ? `${accentColor}22` : undefined,
-                                color: accentColor,
-                                borderColor: accentColor ? `${accentColor}55` : undefined,
+                                background: accentColor ? `${accentColor}` : "var(--accent-light)",
+                                color: "#ffffff",
+                                borderColor: "#2b1a0e",
+                                whiteSpace: "nowrap",
+                                flexShrink: 0,
                             }}
                         >
                             {policyLabel}
