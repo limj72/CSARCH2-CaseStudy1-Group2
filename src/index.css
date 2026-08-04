@@ -603,8 +603,8 @@ button.btn-play-toggle:hover {
   background: linear-gradient(
     90deg,
     var(--accent-light) 0%,
-    var(--accent-light) var(--progress, 0%),
-    transparent var(--progress, 0%),
+    var(--accent-light) calc(var(--progress-ratio, 0) * 100%),
+    transparent calc(var(--progress-ratio, 0) * 100%),
     transparent 100%
   ),
   repeating-linear-gradient(

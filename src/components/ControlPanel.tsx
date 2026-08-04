@@ -495,7 +495,7 @@ export default function ControlPanel() {
                                 setCurrentStepIndex(Number(e.target.value));
                             }}
                             className={`scrubber-slider ${isPlaying ? "is-playing" : ""}`}
-                            style={{ '--progress': `${totalSteps > 1 ? (currentStepIndex / (totalSteps - 1)) * 100 : 0}%` } as React.CSSProperties}
+                            style={{ '--progress-ratio': totalSteps > 1 ? currentStepIndex / (totalSteps - 1) : 0 } as React.CSSProperties}
                         />
                     </div>
                 </div>
