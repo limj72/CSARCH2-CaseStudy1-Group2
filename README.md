@@ -104,18 +104,18 @@ The simulation engine measures and computes all 7 required metrics:
 * **Non-Load-Through Policy**:
   When a cache miss occurs, the CPU must wait while the entire main memory block ($B$ words) is transferred into the cache before reading the target word from cache.
 
-  $$
-  \text{Miss Penalty}_{\text{Non-Load-Through}} = T_{\text{hit}} + (B \times T_{\text{mem}}) + T_{\text{hit}}
-  $$
+$$
+\text{Miss Penalty}_{\text{Non-Load-Through}} = T_{\text{hit}} + (B \times T_{\text{mem}}) + T_{\text{hit}}
+$$
 
 > For $B = 4$ words, $T_{\text{hit}} = 1$, and $T_{\text{mem}} = 10$: $\text{Miss Penalty} = 1 + (4 \times 10) + 1 = 42\text{ cycles}$.
 
 * **Load-Through Policy**:
   When a cache miss occurs, the requested word is forwarded directly from main memory to the CPU while the block is loaded into cache in parallel.
 
-  $$
-  \text{Miss Penalty}_{\text{Load-Through}} = T_{\text{hit}} + T_{\text{mem}}
-  $$
+$$
+\text{Miss Penalty}_{\text{Load-Through}} = T_{\text{hit}} + T_{\text{mem}}
+$$
 
 > For $T_{\text{hit}} = 1$ and $T_{\text{mem}} = 10$: $\text{Miss Penalty} = 1 + 10 = 11\text{ cycles}$.
 ---
