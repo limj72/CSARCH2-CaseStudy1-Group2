@@ -446,25 +446,16 @@ button.btn-primary:active {
   opacity: 0.5;
 }
 
-/* --- Goomba Loading Animation Indicator --- */
+/* --- Goomba Animation Indicator --- */
 .goomba-spinner {
   display: inline-block;
-  font-size: 1.1rem;
-  line-height: 1;
-  animation: goomba-walk 0.4s steps(2, start) infinite;
-  filter: drop-shadow(1px 1px 0 #2b1a0e);
-}
-
-@keyframes goomba-walk {
-  0% {
-    transform: translateY(0) rotate(-6deg);
-  }
-  50% {
-    transform: translateY(-2px) rotate(6deg);
-  }
-  100% {
-    transform: translateY(0) rotate(-6deg);
-  }
+  width: 22px;
+  height: 22px;
+  background-image: url('./assets/goomba-walking.gif');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  vertical-align: middle;
 }
 
 .playback-controls {
