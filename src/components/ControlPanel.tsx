@@ -13,6 +13,7 @@ import type { SimulationResult } from "../types/SimulationResult";
 import StatisticsPanel from "./StatisticsPanel";
 import TraceLog from "./TraceLog";
 import CacheGrid from "./CacheGrid";
+import PDFReportModal from "./PDFReportModal";
 
 export default function ControlPanel() {
 
@@ -23,9 +24,11 @@ export default function ControlPanel() {
     const [resultLRU, setResultLRU] = useState<SimulationResult | null>(null);
     const [resultMRU, setResultMRU] = useState<SimulationResult | null>(null);
     const [viewMode, setViewMode] = useState<"final" | "step">("step");
+    const [displayPolicy, setDisplayPolicy] = useState<"both" | "lru" | "mru">("both");
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [playSpeed, setPlaySpeed] = useState(600); // ms per step
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
     const timerRef = useRef<number | null>(null);
 
@@ -162,6 +165,18 @@ export default function ControlPanel() {
                             </select>
                         </div>
 
+                        <div className="form-group full-width">
+                            <label>Policy Selection (Visible Panel)</label>
+                            <select
+                                value={displayPolicy}
+                                onChange={(e) => setDisplayPolicy(e.target.value as "both" | "lru" | "mru")}
+                            >
+                                <option value="both">Compare Both (LRU & MRU Side-by-Side)</option>
+                                <option value="lru">LRU Only (Least Recently Used)</option>
+                                <option value="mru">MRU Only (Most Recently Used)</option>
+                            </select>
+                        </div>
+
                         <div className="form-group">
                             <label>Block Size (words)</label>
                             <select
@@ -231,12 +246,42 @@ export default function ControlPanel() {
                         </div>
                     </div>
 
-                    <button className="btn-primary" onClick={runSimulation}>
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                        </svg>
-                        Run Simulation
-                    </button>
+                    <div style={{ display: "flex", gap: "8px", marginTop: "14px", marginBottom: "4px" }}>
+                        <button
+                            className="btn-primary"
+                            onClick={runSimulation}
+                            style={{
+                                flex: 1,
+                                padding: "9px 12px",
+                                fontSize: "0.76rem",
+                                marginTop: 0,
+                            }}
+                        >
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            Run Simulation
+                        </button>
+                        {resultLRU && resultMRU && (
+                            <button
+                                className="btn-primary"
+                                onClick={() => setIsReportModalOpen(true)}
+                                style={{
+                                    flex: 1,
+                                    padding: "9px 12px",
+                                    fontSize: "0.76rem",
+                                    marginTop: 0,
+                                    background: "var(--secondary)",
+                                }}
+                            >
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                PDF Report Builder
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Statistics Dashboard Panel — LRU vs MRU side by side */}
@@ -259,19 +304,23 @@ export default function ControlPanel() {
                             <p>Run a simulation to generate statistics & timing models for both policies</p>
                         </div>
                     ) : (
-                        <div className="policy-compare-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                            <StatisticsPanel
-                                statistics={resultLRU?.statistics ?? null}
-                                policyLabel="LRU"
-                                accentColor="#34d399"
-                                hideHeader
-                            />
-                            <StatisticsPanel
-                                statistics={resultMRU?.statistics ?? null}
-                                policyLabel="MRU"
-                                accentColor="#a78bfa"
-                                hideHeader
-                            />
+                        <div className="policy-compare-grid">
+                            {(displayPolicy === "both" || displayPolicy === "lru") && (
+                                <StatisticsPanel
+                                    statistics={resultLRU?.statistics ?? null}
+                                    policyLabel="LRU — Least Recently Used Policy"
+                                    accentColor="#047857"
+                                    hideHeader
+                                />
+                            )}
+                            {(displayPolicy === "both" || displayPolicy === "mru") && (
+                                <StatisticsPanel
+                                    statistics={resultMRU?.statistics ?? null}
+                                    policyLabel="MRU — Most Recently Used Policy"
+                                    accentColor="#6d28d9"
+                                    hideHeader
+                                />
+                            )}
                         </div>
                     )}
                 </div>
@@ -296,16 +345,23 @@ export default function ControlPanel() {
                                     <span>Set {activeTraceLRU.setIndex}</span>
                                     <span className="dot">•</span>
                                     <span>Tag {activeTraceLRU.tag}</span>
-                                    <span className="dot">•</span>
-                                    <span style={{ opacity: 0.8 }}>LRU</span>
-                                    <span className={activeTraceLRU.hit ? "pill pill-hit" : "pill pill-miss"}>
-                                        {activeTraceLRU.hit ? "HIT" : "MISS"}
-                                    </span>
-                                    <span style={{ opacity: 0.8 }}>MRU</span>
-                                    {activeTraceMRU && (
-                                        <span className={activeTraceMRU.hit ? "pill pill-hit" : "pill pill-miss"}>
-                                            {activeTraceMRU.hit ? "HIT" : "MISS"}
-                                        </span>
+                                    {(displayPolicy === "both" || displayPolicy === "lru") && (
+                                        <>
+                                            <span className="dot">•</span>
+                                            <span style={{ opacity: 0.8 }}>LRU</span>
+                                            <span className={activeTraceLRU.hit ? "pill pill-hit" : "pill pill-miss"}>
+                                                {activeTraceLRU.hit ? "HIT" : "MISS"}
+                                            </span>
+                                        </>
+                                    )}
+                                    {(displayPolicy === "both" || displayPolicy === "mru") && activeTraceMRU && (
+                                        <>
+                                            <span className="dot">•</span>
+                                            <span style={{ opacity: 0.8 }}>MRU</span>
+                                            <span className={activeTraceMRU.hit ? "pill pill-hit" : "pill pill-miss"}>
+                                                {activeTraceMRU.hit ? "HIT" : "MISS"}
+                                            </span>
+                                        </>
                                     )}
                                 </div>
                             )}
@@ -409,17 +465,22 @@ export default function ControlPanel() {
                             </button>
                         </div>
 
-                        {/* Speed Selector */}
-                        <div className="speed-selector">
-                            <label>Speed</label>
+                        {/* Prominent Speed Selector */}
+                        <div className="speed-selector-highlight">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                            <label htmlFor="playback-speed-select">SIMULATION SPEED:</label>
                             <select
+                                id="playback-speed-select"
                                 value={playSpeed}
                                 onChange={(e) => setPlaySpeed(Number(e.target.value))}
+                                className="speed-select-input"
                             >
-                                <option value={1000}>1.0s</option>
-                                <option value={600}>0.6s</option>
-                                <option value={300}>0.3s</option>
-                                <option value={100}>0.1s</option>
+                                <option value={1000}>1.0s (Slow)</option>
+                                <option value={600}>0.6s (Normal)</option>
+                                <option value={300}>0.3s (Fast)</option>
+                                <option value={100}>0.1s (Ultra Fast)</option>
                             </select>
                         </div>
 
@@ -442,60 +503,118 @@ export default function ControlPanel() {
                 </div>
             )}
 
-            {/* Side-by-Side Visualizer & Trace Grid — LRU (left) vs MRU (right) */}
-            <div
-                className="visualizer-grid section-margin"
-                style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "1.5rem",
-                    alignItems: "start",
-                }}
-            >
+            {/* Visualizer & Trace Section */}
+            {displayPolicy === "both" ? (
+                /* Compare Both Mode: LRU (left column) vs MRU (right column) */
+                <div
+                    className="visualizer-grid section-margin"
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: "1.5rem",
+                        alignItems: "start",
+                    }}
+                >
+                    {/* Left Column: LRU */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "1rem", minWidth: 0 }}>
+                        <div className="glass-card">
+                            <CacheGrid
+                                cacheState={currentStepLRU?.cacheState ?? []}
+                                activeResult={viewMode === "step" ? activeTraceLRU : undefined}
+                                blockSize={blockSize}
+                                policyLabel="LRU (Least Recently Used)"
+                                accentColor="#047857"
+                            />
+                        </div>
 
-                {/* Left Column: LRU */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem", minWidth: 0 }}>
+                        <div className="glass-card">
+                            <TraceLog
+                                trace={resultLRU?.steps.map(step => step.trace) ?? []}
+                                currentStep={currentStepIndex}
+                                highlight={viewMode === "step"}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Right Column: MRU */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "1rem", minWidth: 0 }}>
+                        <div className="glass-card">
+                            <CacheGrid
+                                cacheState={currentStepMRU?.cacheState ?? []}
+                                activeResult={viewMode === "step" ? activeTraceMRU : undefined}
+                                blockSize={blockSize}
+                                policyLabel="MRU (Most Recently Used)"
+                                accentColor="#6d28d9"
+                            />
+                        </div>
+
+                        <div className="glass-card">
+                            <TraceLog
+                                trace={resultMRU?.steps.map(step => step.trace) ?? []}
+                                currentStep={currentStepIndex}
+                                highlight={viewMode === "step"}
+                            />
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                /* Single Policy Mode (LRU Only or MRU Only): Cache Grid (Left) & Trace Log (Right) Side-by-Side */
+                <div
+                    className="visualizer-grid section-margin"
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "1.15fr 0.85fr",
+                        gap: "1.5rem",
+                        alignItems: "start",
+                    }}
+                >
                     <div className="glass-card">
                         <CacheGrid
-                            cacheState={currentStepLRU?.cacheState ?? []}
-                            activeResult={viewMode === "step" ? activeTraceLRU : undefined}
+                            cacheState={
+                                displayPolicy === "lru"
+                                    ? currentStepLRU?.cacheState ?? []
+                                    : currentStepMRU?.cacheState ?? []
+                            }
+                            activeResult={
+                                viewMode === "step"
+                                    ? (displayPolicy === "lru" ? activeTraceLRU : activeTraceMRU)
+                                    : undefined
+                            }
                             blockSize={blockSize}
-                            policyLabel="LRU"
-                            accentColor="#34d399"
+                            policyLabel={
+                                displayPolicy === "lru"
+                                    ? "LRU (Least Recently Used)"
+                                    : "MRU (Most Recently Used)"
+                            }
+                            accentColor={displayPolicy === "lru" ? "#047857" : "#6d28d9"}
                         />
                     </div>
 
                     <div className="glass-card">
                         <TraceLog
-                            trace={resultLRU?.steps.map(step => step.trace) ?? []}
+                            trace={
+                                displayPolicy === "lru"
+                                    ? resultLRU?.steps.map(step => step.trace) ?? []
+                                    : resultMRU?.steps.map(step => step.trace) ?? []
+                            }
                             currentStep={currentStepIndex}
                             highlight={viewMode === "step"}
                         />
                     </div>
                 </div>
-
-                {/* Right Column: MRU */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem", minWidth: 0 }}>
-                    <div className="glass-card">
-                        <CacheGrid
-                            cacheState={currentStepMRU?.cacheState ?? []}
-                            activeResult={viewMode === "step" ? activeTraceMRU : undefined}
-                            blockSize={blockSize}
-                            policyLabel="MRU"
-                            accentColor="#a78bfa"
-                        />
-                    </div>
-
-                    <div className="glass-card">
-                        <TraceLog
-                            trace={resultMRU?.steps.map(step => step.trace) ?? []}
-                            currentStep={currentStepIndex}
-                            highlight={viewMode === "step"}
-                        />
-                    </div>
-                </div>
-
-            </div>
+            )}
+            {/* Academic PDF Report Builder Modal */}
+            <PDFReportModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
+                blockSize={blockSize}
+                cacheBlocks={cacheBlocks}
+                readPolicy={readPolicy}
+                sequenceType={sequenceType}
+                displayPolicy={displayPolicy}
+                resultLRU={resultLRU}
+                resultMRU={resultMRU}
+            />
         </>
     );
 }

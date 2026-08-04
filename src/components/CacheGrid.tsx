@@ -17,17 +17,20 @@ export default function CacheGrid({
     policyLabel,
     accentColor,
 }: CacheGridProps) {
+    const containerRef = useRef<HTMLDivElement | null>(null);
     const activeSetRef = useRef<HTMLDivElement | null>(null);
 
-    // Auto-scroll active targeted set into view inside cache-set-list container
+    // Auto-scroll active targeted set into view strictly inside cache-set-list container
     useEffect(() => {
-        // Disabled: scrollIntoView was hijacking the page scroll
-        // if (activeResult !== undefined && activeSetRef.current) {
-        //     activeSetRef.current.scrollIntoView({
-        //         behavior: "smooth",
-        //         block: "nearest",
-        //     });
-        // }
+        if (activeResult !== undefined && activeSetRef.current && containerRef.current) {
+            const container = containerRef.current;
+            const element = activeSetRef.current;
+            const topPos = element.offsetTop - container.offsetTop;
+            container.scrollTo({
+                top: topPos,
+                behavior: "smooth",
+            });
+        }
     }, [activeResult?.setIndex]);
 
     return (
@@ -45,9 +48,11 @@ export default function CacheGrid({
                             className="badge"
                             style={{
                                 marginLeft: "0.6rem",
-                                background: accentColor ? `${accentColor}22` : undefined,
-                                color: accentColor,
-                                borderColor: accentColor ? `${accentColor}55` : undefined,
+                                background: accentColor ? `${accentColor}` : "var(--accent-light)",
+                                color: "#ffffff",
+                                borderColor: "#2b1a0e",
+                                whiteSpace: "nowrap",
+                                flexShrink: 0,
                             }}
                         >
                             {policyLabel}
@@ -72,7 +77,7 @@ export default function CacheGrid({
                 </div>
             ) : (
                 <>
-                    <div className="cache-set-list">
+                    <div className="cache-set-list" ref={containerRef}>
                         {cacheState.map((set, setIndex) => {
                             const isSetTargeted = activeResult?.setIndex === setIndex;
 

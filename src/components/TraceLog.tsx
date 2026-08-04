@@ -8,17 +8,20 @@ interface TraceLogProps {
 }
 
 export default function TraceLog({ trace, currentStep, highlight }: TraceLogProps) {
+    const containerRef = useRef<HTMLDivElement | null>(null);
     const activeRowRef = useRef<HTMLTableRowElement | null>(null);
 
-    // Auto-scroll active step row into view
+    // Auto-scroll active step row into view strictly inside trace-container
     useEffect(() => {
-        // Disabled: scrollIntoView was hijacking the page scroll
-        // if (highlight && activeRowRef.current) {
-        //     activeRowRef.current.scrollIntoView({
-        //         behavior: "smooth",
-        //         block: "nearest",
-        //     });
-        // }
+        if (highlight && activeRowRef.current && containerRef.current) {
+            const container = containerRef.current;
+            const element = activeRowRef.current;
+            const topPos = element.offsetTop - container.offsetTop;
+            container.scrollTo({
+                top: topPos,
+                behavior: "smooth",
+            });
+        }
     }, [currentStep, highlight]);
 
     return (
@@ -55,7 +58,7 @@ export default function TraceLog({ trace, currentStep, highlight }: TraceLogProp
                 </div>
             ) : (
                 <>
-                    <div className="trace-container">
+                    <div className="trace-container" ref={containerRef}>
                         <table className="trace-table">
                             <thead>
                                 <tr>
@@ -65,7 +68,7 @@ export default function TraceLog({ trace, currentStep, highlight }: TraceLogProp
                                     <th>Tag</th>
                                     <th>Result</th>
                                     <th>Target Way</th>
-                                    <th>Evicted/Replaced</th>
+                                    <th>Block Replacement</th>
                                 </tr>
                             </thead>
 
@@ -92,7 +95,13 @@ export default function TraceLog({ trace, currentStep, highlight }: TraceLogProp
                                             </td>
                                             <td>Way {entry.result.way}</td>
                                             <td>
-                                                {entry.result.replaced ? "Yes (Evicted)" : "—"}
+                                                {entry.result.replaced ? (
+                                                    <span style={{ color: "var(--miss)", fontWeight: 700 }}>
+                                                        Evicted Block #{entry.result.evictedBlock ?? "?"}
+                                                    </span>
+                                                ) : (
+                                                    "—"
+                                                )}
                                             </td>
                                         </tr>
                                     );

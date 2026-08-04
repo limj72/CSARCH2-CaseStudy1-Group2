@@ -114,6 +114,7 @@ export default class Cache {
 
         // True if an existing valid block is being evicted
         const replaced = block.valid;
+        const evictedBlock = replaced ? block.memoryBlock : null;
 
         // Load requested block into cache
         block.valid = true;
@@ -129,7 +130,8 @@ export default class Cache {
             tag,
             hit: false,
             way: victim,
-            replaced
+            replaced,
+            evictedBlock
         };
 
     }

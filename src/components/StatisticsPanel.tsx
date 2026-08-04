@@ -18,10 +18,14 @@ export default function StatisticsPanel({
         <span
             className="badge"
             style={{
-                marginLeft: "0.6rem",
-                background: accentColor ? `${accentColor}22` : undefined,
-                color: accentColor,
-                borderColor: accentColor ? `${accentColor}55` : undefined,
+                marginLeft: hideHeader ? "0" : "0.6rem",
+                background: accentColor ? `${accentColor}` : "var(--accent-light)",
+                color: "#ffffff",
+                borderColor: "#2b1a0e",
+                fontWeight: 800,
+                fontSize: "0.78rem",
+                padding: "4px 10px",
+                boxShadow: "2px 2px 0 rgba(43, 26, 14, 0.4)",
             }}
         >
             {policyLabel}
