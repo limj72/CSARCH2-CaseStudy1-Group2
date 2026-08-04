@@ -17,6 +17,9 @@ An interactive, web-based **Cache Memory Simulator** designed for CSARCH2 (Compu
    - [Test Case A: Sequential Sequence](#test-case-a-sequential-sequence)
    - [Test Case B: Mid-Repeat Sequence](#test-case-b-mid-repeat-sequence)
    - [Test Case C: Random Sequence](#test-case-c-random-sequence)
+   - [Test Case D: Minimum Cache Size](#test-case-d-minimum-cache-size-sequential)
+   - [Test Case E: Maximum Cache Size](#test-case-e-maximum-cache-size-sequential)
+   - [Additional Validation: Non-Load Through](#additional-validation-non-load-through-read-policy)
    - [Comparative Summary & Architectural Insights](#comparative-summary--architectural-insights)
 5. [Repository Structure](#repository-structure)
 
@@ -207,10 +210,12 @@ The Mid-Repeat sequence contains forward repetitions, reverse repetitions, and c
 
 ### Test Case C: Random Sequence
 
-- **Pattern Definition**: Generate 64 random memory block accesses within the valid main memory range of block $0$ to block $1023$.
-- **Total Accesses**: 64 memory block accesses per simulation.
+- **Pattern Definition**: Generate 64 random memory block accesses within the valid main memory range of block 0 to block 1023.
+- **Total Accesses**: 64 memory block accesses.
 - **Working Set**: Randomly selected blocks from 1024 possible main memory blocks.
 - **Configuration Used**:
+  - Visualization Mode: Final Memory Snapshot
+  - Policy Selection: Compare Both LRU and MRU Side-by-Side
   - Block Size: 4 words
   - Cache Blocks: 16 blocks
   - Number of Sets: 4
@@ -220,32 +225,27 @@ The Mid-Repeat sequence contains forward repetitions, reverse repetitions, and c
 
 #### Benchmark Results
 
-For this test case, Load-Through was selected as the common read policy so that the analysis could focus on the behavior of the LRU and MRU replacement policies.
+Both replacement policies were tested using the exact same randomly generated sequence, allowing a controlled comparison between LRU and MRU.
 
 | Replacement Policy | Read Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | AMAT (cycles) | Total Access Time (cycles) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **LRU** | Load-Through | 64 | 0 | 64 | **0.00%** | **100.00%** | 11.00 | 704.00 |
-| **MRU** | Load-Through | 64 | 2 | 62 | **3.13%** | **96.88%** | 10.69 | 684.00 |
+| **LRU** | Load-Through | 64 | 1 | 63 | **1.56%** | **98.44%** | 10.84 | 694.00 |
+| **MRU** | Load-Through | 64 | 0 | 64 | **0.00%** | **100.00%** | 11.00 | 704.00 |
 
-#### LRU Simulation Output
-
-![alt text](screenshots/LRU_Random.png)
-
-#### MRU Simulation Output
-
-![alt text](screenshots/MRU_Random.png)
+#### LRU vs. MRU Simulation Output
+![alt text](screenshots/LRU_MRU_RANDOM.png)
 
 #### Analysis
 
-The random test accesses memory blocks from a large address space of 1024 blocks while the cache can store only 16 blocks. Because the accessed blocks are selected randomly, the sequence generally has very low temporal locality. Most blocks are not accessed again before they are replaced, resulting in a high cache miss rate for both replacement policies.
+The Random sequence accesses memory blocks from a large address space of 1024 blocks while the cache can store only 16 blocks. Because the accesses are randomly generated, the sequence has very little temporal locality. Most requested blocks are not accessed again before they are replaced, resulting in high miss rates for both policies.
 
-- **LRU Behavior — 0.00% Hit Rate**: The LRU run produced 64 cache misses and no cache hits. None of the randomly accessed blocks were found in the cache when they were requested again. As a result, every request required a main memory access, producing an AMAT of 11.00 cycles and a total access time of 704 cycles.
+- **LRU Behavior — 1.56% Hit Rate**: LRU produced 1 cache hit and 63 cache misses. One previously accessed block remained in the cache long enough to be requested again. This resulted in an average memory access time of 10.84 cycles and a total memory access time of 694 cycles.
 
-- **MRU Behavior — 3.13% Hit Rate**: The MRU run produced 2 cache hits and 62 cache misses. The two hits indicate that some blocks were randomly accessed again while they were still present in the cache. This slightly reduced the AMAT to 10.69 cycles and the total access time to 684 cycles.
+- **MRU Behavior — 0.00% Hit Rate**: MRU produced 64 cache misses and no cache hits. Any repeated block in the sequence was no longer available when it was requested again, resulting in an average memory access time of 11.00 cycles and a total memory access time of 704 cycles.
 
-- **Observed Performance Difference**: In these particular simulation runs, MRU recorded two more cache hits than LRU and completed the sequence 20 cycles faster. However, the LRU and MRU simulations used different randomly generated access sequences. Therefore, the difference cannot be attributed entirely to the replacement policies. It may also have resulted from the MRU sequence containing more repeated block accesses.
+- **Observed Performance Difference**: For this particular random sequence, LRU achieved one more cache hit than MRU and completed the sequence 10 cycles faster. LRU retained a block that was later accessed again, while MRU replaced blocks based on most-recent use and did not retain any block long enough to produce a hit.
 
-- **Random Access Behavior**: Both policies still produced miss rates above 96%, showing that neither LRU nor MRU performs particularly well when memory accesses have little temporal locality and are spread across a much larger memory space than the cache capacity.
+- **Random Access Behavior**: Both policies still recorded miss rates above 98%, showing that random accesses across a large memory space provide very little opportunity for cache reuse. The small advantage of LRU in this run applies only to this specific random sequence and does not prove that LRU will always outperform MRU for every random input.
 
 ---
 
@@ -254,11 +254,14 @@ To verify system robustness under extreme constraints, a minimum capacity edge c
 - **Configuration**: 4 Cache Blocks (minimum), Block Size of 2 words (minimum), Load-Through.
 - **Architecture**: Because the system is 4-Way Set Associative, a 4-block cache results in exactly **1 Set** for the entire cache.
 
-#### Benchmark Results (Minimum Capacity):
+#### Benchmark Results (Minimum Capacity)
 | Replacement Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | AMAT (cycles) | Total Access Time |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **LRU** | 64 | 0 | 64 | **0.00%** | **100.00%** | 11.00 | 176.00 |
-| **MRU** | 64 | 16 | 48 | **25.00%** | **75.00%** | 8.50 | 136.00 |
+| **LRU** | 16 | 0 | 16 | **0.00%** | **100.00%** | 11.00 | 176.00 |
+| **MRU** | 16 | 4 | 12 | **25.00%** | **75.00%** | 8.50 | 136.00 |
+
+#### LRU vs. MRU Simulation Output
+![alt text](screenshots/LRU_MRU_MINIMUM.png)
 
 #### Analysis:
 Because the cache only holds 4 blocks, but the sequential working set requests 8 blocks ($2n = 8$), the cache capacity is heavily exceeded.
@@ -278,10 +281,46 @@ To complete the edge case analysis, the simulator was tested at its absolute max
 | **LRU** | 256 | 0 | 256 | **0.00%** | **100.00%** | 11.00 | 2,816.00 |
 | **MRU** | 256 | 64 | 192 | **25.00%** | **75.00%** | 8.50 | 2,176.00 |
 
+#### LRU vs. MRU Simulation Output
+![alt text](screenshots/LRU_MRU_MAXIMUM.png)
+
 #### Analysis:
 Even though the cache capacity was vastly increased (64 blocks), the sequential working set scales proportionally with the cache size ($2n = 128$ accessed blocks). Because the working set strictly exceeds the cache size by a factor of 2, the exact same thrashing behavior occurs.
 - **LRU** still yields a 0% hit rate, as the cyclic access pattern ensures every block is evicted exactly before it is needed again.
 - **MRU** perfectly maintains a 25% hit rate. The mathematics behind this are fascinating: out of the 8 blocks that map to each set, MRU preserves the first 3 blocks accessed. Then it thrashes the 4th way for the middle blocks, which actually leaves the *last* block accessed safely residing in the cache. On the second loop, it hits on the first 3 blocks AND the last block (4 hits per set). With 16 sets, this yields exactly $4 \times 16 = 64$ hits!
+
+---
+
+### Additional Validation: Non-Load-Through Read Policy
+
+- **Pattern Definition**: Access blocks 0 to 31 sequentially and repeat the sequence twice.
+- **Total Accesses**: 64 memory block accesses.
+
+#### Benchmark Results
+
+| Replacement Policy | Read Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | Miss Penalty | AMAT (cycles) | Total Access Time (cycles) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **LRU** | Non-Load-Through | 64 | 0 | 64 | **0.00%** | **100.00%** | 42 cycles | 42.00 | 2,688.00 |
+| **MRU** | Non-Load-Through | 64 | 16 | 48 | **25.00%** | **75.00%** | 42 cycles | 31.75 | 2,032.00 |
+
+#### LRU vs. MRU Simulation Output
+![alt text](screenshots/LRU_MRU_NONLOAD.png)
+
+#### Analysis
+
+This test validates the simulator’s Non-Load-Through read policy using the Sequential sequence. Under this policy, the CPU must wait for the entire four-word memory block to be loaded into the cache before receiving the requested word.
+
+With a cache access time of 1 cycle, a memory access time of 10 cycles per word, and a block size of 4 words, the miss penalty is:
+
+`Miss Penalty = 1 + (4 × 10) + 1 = 42 cycles`
+
+- **LRU Behavior — 0.00% Hit Rate**: LRU produced 0 hits and 64 misses. Because the 32-block working set exceeds the 16-block cache capacity, earlier blocks are evicted before the sequence returns to them. Since every request is a miss, the AMAT is equal to the full 42-cycle miss penalty, resulting in a total memory access time of 2,688 cycles.
+
+- **MRU Behavior — 25.00% Hit Rate**: MRU produced 16 hits and 48 misses. MRU removes the most recently used block when a set is full, allowing some older blocks to remain in the cache until the second pass. These retained blocks produce 16 hits and reduce the AMAT to 31.75 cycles. The total memory access time is therefore reduced to 2,032 cycles.
+
+- **Read Policy Effect**: The hit and miss counts are the same as those produced by the corresponding Load-Through tests because the read policy does not change cache placement or replacement behavior. It only changes the time required to service a cache miss.
+
+- **Overall Observation**: Non-Load-Through produces significantly higher AMAT and total access time than Load-Through because an entire four-word block must be transferred before the CPU receives the requested data. This demonstrates how the selected read policy affects performance even when the cache hit and miss behavior remains unchanged.
 
 ---
 
@@ -293,15 +332,6 @@ Even though the cache capacity was vastly increased (64 blocks), the sequential 
 2. **Impact of Read Policy on Performance**:
    - **Load-Through** drastically reduces miss penalty ($11\text{ cycles}$ vs $42\text{ cycles}$ for $B=4$), resulting in up to **$3.8\times$ lower Total Memory Access Time**.
    - As Block Size $B$ increases under **Non-Load-Through**, miss penalty grows linearly ($B \times T_{\text{mem}} + 1$), underscoring the efficiency of Load-Through in modern memory controllers.
-
----
-
-## System Features & User Guide
-
-- **Visual Cache Inspector**: View live grid states of all cache sets, ways, tags, valid bits, and block contents.
-- **Trace Execution Modes**: Toggle between **Final Snapshot** or step-by-step **Animated Trace** with step navigation controls (Previous / Next).
-- **Execution Log Table**: Comprehensive log table detailing each memory access request, set index, tag, hit/miss outcome, allocated way, and replacement flag.
-- **Dynamic Parameterization**: Adjust Block Size, Cache Blocks, Read Policy, and Replacement Policy on the fly.
 
 ---
 
