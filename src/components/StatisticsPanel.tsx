@@ -2,23 +2,46 @@ import Statistics from "../simulator/Statistics";
 
 interface StatisticsPanelProps {
     statistics: Statistics | null;
+    policyLabel?: string;
+    accentColor?: string;
+    hideHeader?: boolean;
 }
 
 export default function StatisticsPanel({
     statistics,
+    policyLabel,
+    accentColor,
+    hideHeader,
 }: StatisticsPanelProps) {
+
+    const policyBadge = policyLabel && (
+        <span
+            className="badge"
+            style={{
+                marginLeft: "0.6rem",
+                background: accentColor ? `${accentColor}22` : undefined,
+                color: accentColor,
+                borderColor: accentColor ? `${accentColor}55` : undefined,
+            }}
+        >
+            {policyLabel}
+        </span>
+    );
 
     if (!statistics) {
         return (
             <div>
-                <h2 className="section-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="18" y1="20" x2="18" y2="10"></line>
-                        <line x1="12" y1="20" x2="12" y2="4"></line>
-                        <line x1="6" y1="20" x2="6" y2="14"></line>
-                    </svg>
-                    Performance Metrics
-                </h2>
+                {!hideHeader && (
+                    <h2 className="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        Performance Metrics
+                        {policyBadge}
+                    </h2>
+                )}
                 <div className="stats-empty">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                         <path d="M3 3v18h18"></path>
@@ -32,14 +55,20 @@ export default function StatisticsPanel({
 
     return (
         <div>
-            <h2 className="section-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="18" y1="20" x2="18" y2="10"></line>
-                    <line x1="12" y1="20" x2="12" y2="4"></line>
-                    <line x1="6" y1="20" x2="6" y2="14"></line>
-                </svg>
-                Performance Metrics & Analysis
-            </h2>
+            {!hideHeader && (
+                <h2 className="section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    Performance Metrics & Analysis
+                    {policyBadge}
+                </h2>
+            )}
+            {hideHeader && policyBadge && (
+                <div style={{ marginBottom: "0.75rem" }}>{policyBadge}</div>
+            )}
 
             <div className="stats-sections-grid">
                 
