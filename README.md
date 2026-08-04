@@ -249,11 +249,23 @@ The random test accesses memory blocks from a large address space of 1024 blocks
 
 - **Random Access Behavior**: Both policies still produced miss rates above 96%, showing that neither LRU nor MRU performs particularly well when memory accesses have little temporal locality and are spread across a much larger memory space than the cache capacity.
 
-#### Limitation of the Random Comparison
+---
 
-The simulator generates a new random sequence each time the **Run Simulation** button is pressed. Consequently, the LRU and MRU results shown above were produced using different memory access sequences.
+### Test Case D: Minimum Cache Size (Sequential)
+To verify system robustness under extreme constraints, a minimum capacity edge case was tested using the **Sequential** sequence.
+- **Configuration**: 4 Cache Blocks (minimum), Block Size of 2 words (minimum), Load-Through.
+- **Architecture**: Because the system is 4-Way Set Associative, a 4-block cache results in exactly **1 Set** for the entire cache.
 
-For a fully controlled comparison, both replacement policies should be tested using the exact same 64-block random sequence. The current results should therefore be interpreted as separate demonstrations of LRU and MRU behavior under random access rather than a direct policy-to-policy comparison.
+#### Benchmark Results (Minimum Capacity):
+| Replacement Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | AMAT (cycles) | Total Access Time |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **LRU** | 64 | 0 | 64 | **0.00%** | **100.00%** | 11.00 | 176.00 |
+| **MRU** | 64 | 16 | 48 | **25.00%** | **75.00%** | 8.50 | 136.00 |
+
+#### Analysis:
+Because the cache only holds 4 blocks, but the sequential working set requests 8 blocks ($2n = 8$), the cache capacity is heavily exceeded.
+- **LRU** suffers from 100% capacity thrashing. It constantly evicts the oldest block, so by the time the sequence loops back to Block 0, it has already been kicked out.
+- **MRU** performs significantly better with a 25% hit rate. Because MRU only evicts the *most recently used* block when full, it accidentally "pins" the first 3 blocks into Ways 0, 1, and 2, and exclusively thrashes Way 3. On the second sequence loop, it successfully hits on those first 3 protected blocks!
 
 ---
 
