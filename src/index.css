@@ -755,11 +755,17 @@ button.btn-play-toggle:hover {
 
 .stat-item.hit-card .val { color: var(--hit); }
 .stat-item.miss-card .val { color: var(--miss); }
-.stat-item.highlight-card {
-  border-color: var(--accent);
-  background: var(--accent-dim);
+.stat-item.hit-highlight-card {
+  border-color: var(--hit-border);
+  background: var(--hit-bg);
 }
-.stat-item.highlight-card .val { color: var(--accent); }
+.stat-item.hit-highlight-card .val { color: var(--hit); }
+
+.stat-item.miss-highlight-card {
+  border-color: var(--miss-border);
+  background: var(--miss-bg);
+}
+.stat-item.miss-highlight-card .val { color: var(--miss); }
 
 .timing-badge-list {
   display: flex;
