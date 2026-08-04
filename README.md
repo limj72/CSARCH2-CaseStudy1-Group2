@@ -104,18 +104,18 @@ The simulation engine measures and computes all 7 required metrics:
 * **Non-Load-Through Policy**:
   When a cache miss occurs, the CPU must wait while the entire main memory block ($B$ words) is transferred into the cache before reading the target word from cache.
   
-  $$
+  ```math
   \text{Miss Penalty}_{\text{Non-Load}} = T_{\text{hit}} + (B \times T_{\text{mem}}) + T_{\text{hit}}
-  $$
+  ```
 
 > For $B = 4$ words, $T_{\text{hit}} = 1$, and $T_{\text{mem}} = 10$: $\text{Miss Penalty} = 1 + (4 \times 10) + 1 = 42\text{ cycles}$.
 
 * **Load-Through Policy**:
   When a cache miss occurs, the requested word is forwarded directly from main memory to the CPU while the block is loaded into cache in parallel.
   
-  $$
+  ```math
   \text{Miss Penalty}_{\text{Load}} = T_{\text{hit}} + T_{\text{mem}}
-  $$
+  ```
 
 > For $T_{\text{hit}} = 1$ and $T_{\text{mem}} = 10$: $\text{Miss Penalty} = 1 + 10 = 11\text{ cycles}$.
 ---
@@ -235,39 +235,43 @@ To verify system robustness under extreme constraints, a minimum capacity edge c
 - **Architecture**: Because the system is 4-Way Set Associative, a 4-block cache results in exactly **1 Set** for the entire cache.
 
 #### Benchmark Results (Minimum Capacity)
-| Replacement Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | AMAT (cycles) | Total Access Time |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **LRU** | 16 | 0 | 16 | **0.00%** | **100.00%** | 11.00 | 176.00 |
-| **MRU** | 16 | 4 | 12 | **25.00%** | **75.00%** | 8.50 | 136.00 |
+| Replacement Policy | Read Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | Miss Penalty | AMAT (cycles) | Total Access Time (cycles) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **LRU** | Load-Through | 16 | 0 | 16 | **0.00%** | **100.00%** | 11 cycles | 11.00 | 176.00 |
+| **MRU** | Load-Through | 16 | 4 | 12 | **25.00%** | **75.00%** | 11 cycles | 8.50 | 136.00 |
+| **LRU** | Non-Load-Through | 16 | 0 | 16 | **0.00%** | **100.00%** | 22 cycles | 22.00 | 352.00 |
+| **MRU** | Non-Load-Through | 16 | 4 | 12 | **25.00%** | **75.00%** | 22 cycles | 16.75 | 268.00 |
 
 #### LRU vs. MRU Simulation Output
 ![alt text](screenshots/LRU_MRU_MINIMUM.png)
 
 #### Analysis:
 Because the cache only holds 4 blocks, but the sequential working set requests 8 blocks ($2n = 8$), the cache capacity is heavily exceeded.
-- **LRU** suffers from 100% capacity thrashing. It constantly evicts the oldest block, so by the time the sequence loops back to Block 0, it has already been kicked out.
-- **MRU** performs significantly better with a 25% hit rate. Because MRU only evicts the *most recently used* block when full, it accidentally "pins" the first 3 blocks into Ways 0, 1, and 2, and exclusively thrashes Way 3. On the second sequence loop, it successfully hits on those first 3 protected blocks!
+- **LRU** suffers from 100% capacity thrashing. It constantly evicts the oldest block, so by the time the sequence loops back to Block 0, it has already been kicked out. Under Non-Load-Through ($B=2$ words), the 22-cycle miss penalty increases total memory access time from 176 to 352 cycles.
+- **MRU** performs significantly better with a 25% hit rate. Because MRU only evicts the *most recently used* block when full, it accidentally "pins" the first 3 blocks into Ways 0, 1, and 2, and exclusively thrashes Way 3. On the second sequence loop, it successfully hits on those first 3 protected blocks! Non-Load-Through increases AMAT from 8.50 to 16.75 cycles and total access time from 136 to 268 cycles.
 
 ---
 
 ### Test Case E: Maximum Cache Size (Sequential)
 To complete the edge case analysis, the simulator was tested at its absolute maximum configurable limits.
-- **Configuration**: 64 Cache Blocks (maximum), Block Size of 16 words (maximum), Load-Through.
+- **Configuration**: 64 Cache Blocks (maximum), Block Size of 16 words (maximum).
 - **Architecture**: A 64-block cache utilizing 4-Way Set Associativity results in exactly **16 Sets** ($64 / 4$).
 
 #### Benchmark Results (Maximum Capacity):
-| Replacement Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | AMAT (cycles) | Total Access Time |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **LRU** | 256 | 0 | 256 | **0.00%** | **100.00%** | 11.00 | 2,816.00 |
-| **MRU** | 256 | 64 | 192 | **25.00%** | **75.00%** | 8.50 | 2,176.00 |
+| Replacement Policy | Read Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | Miss Penalty | AMAT (cycles) | Total Access Time (cycles) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **LRU** | Load-Through | 256 | 0 | 256 | **0.00%** | **100.00%** | 11 cycles | 11.00 | 2,816.00 |
+| **MRU** | Load-Through | 256 | 64 | 192 | **25.00%** | **75.00%** | 11 cycles | 8.50 | 2,176.00 |
+| **LRU** | Non-Load-Through | 256 | 0 | 256 | **0.00%** | **100.00%** | 162 cycles | 162.00 | 41,472.00 |
+| **MRU** | Non-Load-Through | 256 | 64 | 192 | **25.00%** | **75.00%** | 162 cycles | 121.75 | 31,168.00 |
 
 #### LRU vs. MRU Simulation Output
 ![alt text](screenshots/LRU_MRU_MAXIMUM.png)
 
 #### Analysis:
 Even though the cache capacity was vastly increased (64 blocks), the sequential working set scales proportionally with the cache size ($2n = 128$ accessed blocks). Because the working set strictly exceeds the cache size by a factor of 2, the exact same thrashing behavior occurs.
-- **LRU** still yields a 0% hit rate, as the cyclic access pattern ensures every block is evicted exactly before it is needed again.
-- **MRU** perfectly maintains a 25% hit rate. The mathematics behind this are fascinating: out of the 8 blocks that map to each set, MRU preserves the first 3 blocks accessed. Then it thrashes the 4th way for the middle blocks, which actually leaves the *last* block accessed safely residing in the cache. On the second loop, it hits on the first 3 blocks AND the last block (4 hits per set). With 16 sets, this yields exactly $4 \times 16 = 64$ hits!
+- **LRU** still yields a 0% hit rate, as the cyclic access pattern ensures every block is evicted exactly before it is needed again. Under Non-Load-Through ($B=16$ words, Miss Penalty = 162 cycles), the large block size causes AMAT to rise to 162.00 cycles, resulting in a total access time of 41,472 cycles.
+- **MRU** perfectly maintains a 25% hit rate. Out of the 8 blocks that map to each set, MRU preserves the first 3 blocks accessed. Then it thrashes the 4th way for the middle blocks, which leaves the *last* block accessed safely residing in the cache. On the second loop, it hits on the first 3 blocks AND the last block (4 hits per set $\times 16$ sets = 64 hits). Non-Load-Through increases AMAT from 8.50 to 121.75 cycles and total access time from 2,176 to 31,168 cycles.
 
 ---
 
