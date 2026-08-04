@@ -419,6 +419,7 @@ button.btn-primary:active {
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  flex: 1;
 }
 
 .step-badge {
@@ -511,12 +512,41 @@ button.btn-play-toggle:hover {
   border: 3px solid #2b1a0e !important;
   box-shadow: 2px 2px 0 rgba(43, 26, 14, 0.5);
   font-weight: 800;
-  animation: pulse-speed-badge 2s ease-in-out infinite;
 }
 
-@keyframes pulse-speed-badge {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.04); }
+.group-members-dropdown {
+  position: relative;
+  cursor: pointer;
+  background: var(--bg-surface);
+}
+
+.group-members-dropdown .dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--bg-elevated);
+  border: 2px solid var(--text-primary);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+  box-shadow: 4px 4px 0 rgba(43, 26, 14, 0.4);
+  z-index: 100;
+  margin-top: 6px;
+}
+
+.group-members-dropdown:hover .dropdown-content {
+  display: flex;
+}
+
+.group-members-dropdown .dropdown-content span {
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+  color: var(--text-primary);
+  text-transform: capitalize;
 }
 
 .speed-selector-highlight {
