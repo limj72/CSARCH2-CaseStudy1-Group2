@@ -18,10 +18,10 @@ export default function ControlPanel() {
 
     const [blockSize, setBlockSize] = useState(4);
     const [cacheBlocks, setCacheBlocks] = useState(16);
-    const [replacement, setReplacement] = useState<"LRU" | "MRU">("LRU");
     const [readPolicy, setReadPolicy] = useState(ReadPolicies.LoadThrough);
     const [sequenceType, setSequenceType] = useState(SequenceTypes.Sequential);
-    const [result, setResult] = useState<SimulationResult | null>(null);
+    const [resultLRU, setResultLRU] = useState<SimulationResult | null>(null);
+    const [resultMRU, setResultMRU] = useState<SimulationResult | null>(null);
     const [viewMode, setViewMode] = useState<"final" | "step">("step");
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -29,47 +29,71 @@ export default function ControlPanel() {
 
     const timerRef = useRef<number | null>(null);
 
-    const currentStep =
-        result
+    // Both policies run against the identical access sequence, so their
+    // step counts always match — either result can be used as the
+    // canonical source of truth for playback length.
+    const totalSteps = resultLRU?.steps.length ?? 0;
+
+    const currentStepLRU =
+        resultLRU
             ? (
                 viewMode === "final"
-                    ? result.steps[result.steps.length - 1]
-                    : result.steps[currentStepIndex]
+                    ? resultLRU.steps[resultLRU.steps.length - 1]
+                    : resultLRU.steps[currentStepIndex]
+            )
+            : undefined;
+
+    const currentStepMRU =
+        resultMRU
+            ? (
+                viewMode === "final"
+                    ? resultMRU.steps[resultMRU.steps.length - 1]
+                    : resultMRU.steps[currentStepIndex]
             )
             : undefined;
 
     function runSimulation() {
         setIsPlaying(false);
-        const policy =
-            replacement === "LRU"
-                ? new LRU()
-                : new MRU();
 
-        const cache = new Cache({
-            blockSize,
-            cacheBlocks,
-            readPolicy,
-            replacementPolicy: policy
-        });
-
+        // Generate a single access sequence and replay it against both
+        // policies so the comparison is a true apples-to-apples run.
         const sequence =
             SequenceGenerator.generate(
                 sequenceType,
                 cacheBlocks
             );
 
-        const simResult = cache.runSequence(sequence);
+        const lruCache = new Cache({
+            blockSize,
+            cacheBlocks,
+            readPolicy,
+            replacementPolicy: new LRU()
+        });
 
-        setResult(simResult);
+        const mruCache = new Cache({
+            blockSize,
+            cacheBlocks,
+            readPolicy,
+            replacementPolicy: new MRU()
+        });
+
+        setResultLRU(lruCache.runSequence(sequence));
+        setResultMRU(mruCache.runSequence(sequence));
         setCurrentStepIndex(0);
+
+        // Jump straight into the animated trace so the user sees it run
+        // immediately instead of having to press Auto Play separately.
+        if (viewMode === "step") {
+            setIsPlaying(true);
+        }
     }
 
     // Auto-play interval handling
     useEffect(() => {
-        if (isPlaying && result) {
+        if (isPlaying && totalSteps > 0) {
             timerRef.current = window.setInterval(() => {
                 setCurrentStepIndex((prevIndex) => {
-                    if (prevIndex >= result.steps.length - 1) {
+                    if (prevIndex >= totalSteps - 1) {
                         setIsPlaying(false);
                         return prevIndex;
                     }
@@ -86,10 +110,13 @@ export default function ControlPanel() {
                 clearInterval(timerRef.current);
             }
         };
-    }, [isPlaying, result, playSpeed]);
+    }, [isPlaying, totalSteps, playSpeed]);
 
-    const activeTraceResult = currentStep?.trace.result;
-    const isAtEnd = result ? currentStepIndex >= result.steps.length - 1 : false;
+    // Both caches see the same block/set/tag per step (identical sequence);
+    // only hit/miss and the chosen way can differ between LRU and MRU.
+    const activeTraceLRU = currentStepLRU?.trace.result;
+    const activeTraceMRU = currentStepMRU?.trace.result;
+    const isAtEnd = totalSteps > 0 ? currentStepIndex >= totalSteps - 1 : false;
 
     function handlePlayToggle() {
         if (isAtEnd) {
@@ -167,19 +194,6 @@ export default function ControlPanel() {
                         </div>
 
                         <div className="form-group full-width">
-                            <label>Replacement Policy</label>
-                            <select
-                                value={replacement}
-                                onChange={(e) =>
-                                    setReplacement(e.target.value as "LRU" | "MRU")
-                                }
-                            >
-                                <option value="LRU">LRU — Least Recently Used</option>
-                                <option value="MRU">MRU — Most Recently Used</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group full-width">
                             <label>Read Policy</label>
                             <select
                                 value={readPolicy}
@@ -225,36 +239,74 @@ export default function ControlPanel() {
                     </button>
                 </div>
 
-                {/* Statistics Dashboard Panel */}
+                {/* Statistics Dashboard Panel — LRU vs MRU side by side */}
                 <div className="glass-card">
-                    <StatisticsPanel
-                        statistics={result?.statistics ?? null}
-                    />
+                    <h2 className="section-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        Performance Metrics
+                    </h2>
+
+                    {!resultLRU && !resultMRU ? (
+                        <div className="stats-empty">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M3 3v18h18"></path>
+                                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path>
+                            </svg>
+                            <p>Run a simulation to generate statistics & timing models for both policies</p>
+                        </div>
+                    ) : (
+                        <div className="policy-compare-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                            <StatisticsPanel
+                                statistics={resultLRU?.statistics ?? null}
+                                policyLabel="LRU"
+                                accentColor="#34d399"
+                                hideHeader
+                            />
+                            <StatisticsPanel
+                                statistics={resultMRU?.statistics ?? null}
+                                policyLabel="MRU"
+                                accentColor="#a78bfa"
+                                hideHeader
+                            />
+                        </div>
+                    )}
                 </div>
 
             </div>
 
             {/* Step Playback Toolbar */}
-            {viewMode === "step" && result && (
+            {viewMode === "step" && totalSteps > 0 && (
                 <div className="glass-card playback-card section-margin">
                     <div className="playback-bar">
                         
                         {/* Step Details Pill */}
                         <div className="playback-status-group">
                             <span className="step-badge">
-                                STEP {currentStepIndex + 1} / {result.steps.length}
+                                STEP {currentStepIndex + 1} / {totalSteps}
                             </span>
 
-                            {activeTraceResult && (
+                            {activeTraceLRU && (
                                 <div className="step-info-pill">
-                                    <span>Accessing Block <strong>#{activeTraceResult.memoryBlock}</strong> <span style={{ opacity: 0.7, fontSize: "0.75rem" }}>(Words W{activeTraceResult.memoryBlock * blockSize}–W{(activeTraceResult.memoryBlock + 1) * blockSize - 1})</span></span>
+                                    <span>Accessing Block <strong>#{activeTraceLRU.memoryBlock}</strong> <span style={{ opacity: 0.7, fontSize: "0.75rem" }}>(Words W{activeTraceLRU.memoryBlock * blockSize}–W{(activeTraceLRU.memoryBlock + 1) * blockSize - 1})</span></span>
                                     <span className="dot">•</span>
-                                    <span>Set {activeTraceResult.setIndex}</span>
+                                    <span>Set {activeTraceLRU.setIndex}</span>
                                     <span className="dot">•</span>
-                                    <span>Tag {activeTraceResult.tag}</span>
-                                    <span className={activeTraceResult.hit ? "pill pill-hit" : "pill pill-miss"}>
-                                        {activeTraceResult.hit ? "HIT" : "MISS"}
+                                    <span>Tag {activeTraceLRU.tag}</span>
+                                    <span className="dot">•</span>
+                                    <span style={{ opacity: 0.8 }}>LRU</span>
+                                    <span className={activeTraceLRU.hit ? "pill pill-hit" : "pill pill-miss"}>
+                                        {activeTraceLRU.hit ? "HIT" : "MISS"}
                                     </span>
+                                    <span style={{ opacity: 0.8 }}>MRU</span>
+                                    {activeTraceMRU && (
+                                        <span className={activeTraceMRU.hit ? "pill pill-hit" : "pill pill-miss"}>
+                                            {activeTraceMRU.hit ? "HIT" : "MISS"}
+                                        </span>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -334,7 +386,7 @@ export default function ControlPanel() {
                                 title="Next Step"
                                 onClick={() => {
                                     setIsPlaying(false);
-                                    setCurrentStepIndex(i => Math.min(result.steps.length - 1, i + 1));
+                                    setCurrentStepIndex(i => Math.min(totalSteps - 1, i + 1));
                                 }}
                             >
                                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -347,7 +399,7 @@ export default function ControlPanel() {
                                 title="Last Step"
                                 onClick={() => {
                                     setIsPlaying(false);
-                                    setCurrentStepIndex(result.steps.length - 1);
+                                    setCurrentStepIndex(totalSteps - 1);
                                 }}
                             >
                                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -378,7 +430,7 @@ export default function ControlPanel() {
                         <input
                             type="range"
                             min="0"
-                            max={result.steps.length - 1}
+                            max={totalSteps - 1}
                             value={currentStepIndex}
                             onChange={(e) => {
                                 setIsPlaying(false);
@@ -390,25 +442,57 @@ export default function ControlPanel() {
                 </div>
             )}
 
-            {/* Side-by-Side Visualizer & Trace Grid */}
-            <div className="visualizer-grid section-margin">
-                
-                {/* Left Column: Cache Snapshot */}
-                <div className="glass-card">
-                    <CacheGrid
-                        cacheState={currentStep?.cacheState ?? []}
-                        activeResult={viewMode === "step" ? activeTraceResult : undefined}
-                        blockSize={blockSize}
-                    />
+            {/* Side-by-Side Visualizer & Trace Grid — LRU (left) vs MRU (right) */}
+            <div
+                className="visualizer-grid section-margin"
+                style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "1.5rem",
+                    alignItems: "start",
+                }}
+            >
+
+                {/* Left Column: LRU */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem", minWidth: 0 }}>
+                    <div className="glass-card">
+                        <CacheGrid
+                            cacheState={currentStepLRU?.cacheState ?? []}
+                            activeResult={viewMode === "step" ? activeTraceLRU : undefined}
+                            blockSize={blockSize}
+                            policyLabel="LRU"
+                            accentColor="#34d399"
+                        />
+                    </div>
+
+                    <div className="glass-card">
+                        <TraceLog
+                            trace={resultLRU?.steps.map(step => step.trace) ?? []}
+                            currentStep={currentStepIndex}
+                            highlight={viewMode === "step"}
+                        />
+                    </div>
                 </div>
 
-                {/* Right Column: Trace Execution Log */}
-                <div className="glass-card">
-                    <TraceLog
-                        trace={result?.steps.map(step => step.trace) ?? []}
-                        currentStep={currentStepIndex}
-                        highlight={viewMode === "step"}
-                    />
+                {/* Right Column: MRU */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem", minWidth: 0 }}>
+                    <div className="glass-card">
+                        <CacheGrid
+                            cacheState={currentStepMRU?.cacheState ?? []}
+                            activeResult={viewMode === "step" ? activeTraceMRU : undefined}
+                            blockSize={blockSize}
+                            policyLabel="MRU"
+                            accentColor="#a78bfa"
+                        />
+                    </div>
+
+                    <div className="glass-card">
+                        <TraceLog
+                            trace={resultMRU?.steps.map(step => step.trace) ?? []}
+                            currentStep={currentStepIndex}
+                            highlight={viewMode === "step"}
+                        />
+                    </div>
                 </div>
 
             </div>

@@ -6,12 +6,16 @@ interface CacheGridProps {
     cacheState: CacheSet[];
     activeResult?: AccessResult;
     blockSize?: number;
+    policyLabel?: string;
+    accentColor?: string;
 }
 
 export default function CacheGrid({
     cacheState,
     activeResult,
     blockSize,
+    policyLabel,
+    accentColor,
 }: CacheGridProps) {
     const activeSetRef = useRef<HTMLDivElement | null>(null);
 
@@ -27,7 +31,7 @@ export default function CacheGrid({
 
     return (
         <div className="cache-grid-container">
-            <div className="cache-grid-header">
+            <div className="cache-grid-header" style={{ flexWrap: "wrap", rowGap: "0.5rem" }}>
                 <h2 className="section-title" style={{ marginBottom: 0 }}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -35,6 +39,19 @@ export default function CacheGrid({
                         <line x1="12" y1="17" x2="12" y2="21"></line>
                     </svg>
                     Cache Memory Visual Snapshot (4-Way BSA)
+                    {policyLabel && (
+                        <span
+                            className="badge"
+                            style={{
+                                marginLeft: "0.6rem",
+                                background: accentColor ? `${accentColor}22` : undefined,
+                                color: accentColor,
+                                borderColor: accentColor ? `${accentColor}55` : undefined,
+                            }}
+                        >
+                            {policyLabel}
+                        </span>
+                    )}
                 </h2>
                 {cacheState.length > 0 && (
                     <div className={cacheState.length > 4 ? "badge badge-scrollable" : "badge badge-outline"} title="Scroll inside container to view all sets">
