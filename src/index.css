@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Baloo+2:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Luckiest+Guy&family=Baloo+2:wght@500;600;700;800&display=swap');
 
 /* ========================================================================
    Machine 7 Cache Simulator — Super Mario / 8-bit Platformer Design System
@@ -126,16 +126,16 @@ body::before {
 }
 
 .brand-section h1 {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 2.2rem;
   font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: 0.01em;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
   color: var(--accent-light);
   -webkit-text-stroke: 1.5px var(--text-primary);
   text-shadow:
-    2px 2px 0 var(--text-primary),
-    3px 3px 0 rgba(43, 26, 14, 0.35);
+    3px 3px 0 var(--text-primary),
+    4px 4px 0 rgba(43, 26, 14, 0.4);
   text-transform: uppercase;
   position: relative;
   display: inline-block;
@@ -149,11 +149,17 @@ body::before {
 
 .brand-section .subtitle {
   font-family: var(--font-sans);
-  font-weight: 700;
-  font-size: 0.78rem;
+  font-weight: 800;
+  font-size: 0.85rem;
   color: #fff;
-  text-shadow: 1px 1px 0 var(--text-primary);
-  margin-top: 4px;
+  text-shadow:
+    1.5px 1.5px 0 var(--text-primary),
+    -1px -1px 0 var(--text-primary),
+    1px -1px 0 var(--text-primary),
+    -1px 1px 0 var(--text-primary),
+    1px 1px 0 var(--text-primary),
+    2px 2px 0 var(--text-primary);
+  margin-top: 2px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -413,6 +419,7 @@ button.btn-primary:active {
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  flex: 1;
 }
 
 .step-badge {
@@ -505,12 +512,41 @@ button.btn-play-toggle:hover {
   border: 3px solid #2b1a0e !important;
   box-shadow: 2px 2px 0 rgba(43, 26, 14, 0.5);
   font-weight: 800;
-  animation: pulse-speed-badge 2s ease-in-out infinite;
 }
 
-@keyframes pulse-speed-badge {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.04); }
+.group-members-dropdown {
+  position: relative;
+  cursor: pointer;
+  background: var(--bg-surface);
+}
+
+.group-members-dropdown .dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--bg-elevated);
+  border: 2px solid var(--text-primary);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+  box-shadow: 4px 4px 0 rgba(43, 26, 14, 0.4);
+  z-index: 100;
+  margin-top: 6px;
+}
+
+.group-members-dropdown:hover .dropdown-content {
+  display: flex;
+}
+
+.group-members-dropdown .dropdown-content span {
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+  color: var(--text-primary);
+  text-transform: capitalize;
 }
 
 .speed-selector-highlight {
@@ -562,9 +598,16 @@ button.btn-play-toggle:hover {
 
 .scrubber-slider {
   width: 100%;
-  height: 8px;
+  height: 14px;
   appearance: none;
-  background: repeating-linear-gradient(
+  background: linear-gradient(
+    90deg,
+    var(--accent-light) 0%,
+    var(--accent-light) calc(var(--progress-ratio, 0) * 100%),
+    transparent calc(var(--progress-ratio, 0) * 100%),
+    transparent 100%
+  ),
+  repeating-linear-gradient(
     90deg,
     var(--bg-elevated) 0 10px,
     var(--border) 10px 11px
@@ -746,11 +789,17 @@ button.btn-play-toggle:hover {
 
 .stat-item.hit-card .val { color: var(--hit); }
 .stat-item.miss-card .val { color: var(--miss); }
-.stat-item.highlight-card {
-  border-color: var(--accent);
-  background: var(--accent-dim);
+.stat-item.hit-highlight-card {
+  border-color: var(--hit-border);
+  background: var(--hit-bg);
 }
-.stat-item.highlight-card .val { color: var(--accent); }
+.stat-item.hit-highlight-card .val { color: var(--hit); }
+
+.stat-item.miss-highlight-card {
+  border-color: var(--miss-border);
+  background: var(--miss-bg);
+}
+.stat-item.miss-highlight-card .val { color: var(--miss); }
 
 .timing-badge-list {
   display: flex;

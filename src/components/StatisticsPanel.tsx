@@ -102,14 +102,14 @@ export default function StatisticsPanel({
                             <div className="lbl">Misses</div>
                         </div>
 
-                        <div className="stat-item highlight-card">
+                        <div className="stat-item hit-highlight-card">
                             <div className="val">
                                 {(statistics.hitRate * 100).toFixed(1)}%
                             </div>
                             <div className="lbl">Hit Rate</div>
                         </div>
 
-                        <div className="stat-item">
+                        <div className="stat-item miss-highlight-card">
                             <div className="val">
                                 {(statistics.missRate * 100).toFixed(1)}%
                             </div>
