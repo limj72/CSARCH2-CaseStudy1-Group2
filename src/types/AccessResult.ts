@@ -5,4 +5,5 @@ export interface AccessResult {
     hit: boolean;
     way: number;
     replaced: boolean;
+    evictedBlock?: number | null;
 }

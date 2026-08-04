@@ -17,14 +17,18 @@ export default function CacheGrid({
     policyLabel,
     accentColor,
 }: CacheGridProps) {
+    const containerRef = useRef<HTMLDivElement | null>(null);
     const activeSetRef = useRef<HTMLDivElement | null>(null);
 
-    // Auto-scroll active targeted set into view inside cache-set-list container
+    // Auto-scroll active targeted set into view strictly inside cache-set-list container
     useEffect(() => {
-        if (activeResult !== undefined && activeSetRef.current) {
-            activeSetRef.current.scrollIntoView({
+        if (activeResult !== undefined && activeSetRef.current && containerRef.current) {
+            const container = containerRef.current;
+            const element = activeSetRef.current;
+            const topPos = element.offsetTop - container.offsetTop;
+            container.scrollTo({
+                top: topPos,
                 behavior: "smooth",
-                block: "nearest",
             });
         }
     }, [activeResult?.setIndex]);
@@ -71,7 +75,7 @@ export default function CacheGrid({
                 </div>
             ) : (
                 <>
-                    <div className="cache-set-list">
+                    <div className="cache-set-list" ref={containerRef}>
                         {cacheState.map((set, setIndex) => {
                             const isSetTargeted = activeResult?.setIndex === setIndex;
 
