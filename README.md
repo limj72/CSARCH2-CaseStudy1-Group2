@@ -10,16 +10,15 @@ An interactive, web-based **Cache Memory Simulator** designed for CSARCH2 (Compu
 ---
 
 ## Table of Contents
-1. [Quick Start Guide](#-quick-start-guide)
-2. [Machine 7 Full Specifications & Parameters](#-machine-7-full-specifications--parameters)
-3. [Mathematical Timing & Metric Models](#-mathematical-timing--metric-models)
-4. [Detailed Analysis Write-up (LRU vs. MRU)](#-detailed-analysis-write-up-lru-vs-mru)
+1. [Quick Start Guide](#quick-start-guide)
+2. [Machine 7 Full Specifications & Parameters](#machine-7-full-specifications--parameters)
+3. [Mathematical Timing & Metric Models](#mathematical-timing--metric-models)
+4. [Detailed Analysis Write-up (LRU vs. MRU)](#detailed-analysis-write-up-lru-vs-mru)
    - [Test Case A: Sequential Sequence](#test-case-a-sequential-sequence)
    - [Test Case B: Mid-Repeat Sequence](#test-case-b-mid-repeat-sequence)
    - [Test Case C: Random Sequence](#test-case-c-random-sequence)
    - [Comparative Summary & Architectural Insights](#comparative-summary--architectural-insights)
-5. [System Features & User Guide](#-system-features--user-guide)
-6. [Repository Structure](#-repository-structure)
+5. [Repository Structure](#repository-structure)
 
 ---
 
@@ -35,7 +34,6 @@ An interactive, web-based **Cache Memory Simulator** designed for CSARCH2 (Compu
    ```bash
    cd CSARCH2-CaseStudy1-Group2
    ```
-   *(Or `cd ..` if you are currently inside `cache-simulator/`)*
 
 2. **Install project dependencies**:
    ```bash
@@ -311,16 +309,19 @@ Even though the cache capacity was vastly increased (64 blocks), the sequential 
 
 ```
 CSARCH2-CaseStudy1-Group2/
-├── README.md                 # Primary documentation, specs & Machine 7 analysis
-└── cache-simulator/          # React + Vite TypeScript web application
-    ├── public/               # Static assets
-    ├── src/
-    │   ├── components/       # UI Components (CacheGrid, ControlPanel, TraceLog, Stats)
-    │   ├── pages/            # Simulator Page layout
-    │   ├── simulator/        # Core Cache Engine & Policies (LRU, MRU, Statistics, Generator)
-    │   ├── types/            # TypeScript type definitions
-    │   ├── App.tsx           # Main Application component
-    │   └── main.tsx          # Application entry point
-    ├── package.json          # Project configuration & scripts
-    └── vite.config.ts        # Vite configuration
+├── screenshots/               # Application output benchmark screenshots
+├── src/
+│   ├── assets/                # Goomba and visual UI assets
+│   ├── components/            # UI Components (CacheGrid, ControlPanel, TraceLog, StatisticsPanel, PDFReportModal)
+│   ├── pages/                 # Simulator Page layout
+│   ├── simulator/             # Core Cache Engine & Policies (Cache, CacheSet, CacheBlock, LRU, MRU, Statistics, SequenceGenerator)
+│   ├── types/                 # TypeScript type definitions (AccessResult, SimulationResult, etc.)
+│   ├── App.tsx                # Main Application root
+│   ├── index.css              # Mario 8-bit visual design system & print styles
+│   └── main.tsx               # Application entry point
+├── index.html                 # HTML entry template
+├── package.json               # Project dependencies & scripts
+├── tsconfig.json              # TypeScript compiler configuration
+├── vite.config.ts             # Vite build configuration
+└── README.md                  # Primary project documentation & Machine 7 analysis
 ```
