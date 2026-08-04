@@ -413,10 +413,7 @@ export default function ControlPanel() {
                             >
                                 {isPlaying ? (
                                     <>
-                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                                            <rect x="6" y="4" width="4" height="16"></rect>
-                                            <rect x="14" y="4" width="4" height="16"></rect>
-                                        </svg>
+                                        <span className="goomba-spinner" title="Simulation Playing...">🍄</span>
                                         Pause
                                     </>
                                 ) : isAtEnd ? (
