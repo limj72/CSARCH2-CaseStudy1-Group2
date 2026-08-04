@@ -112,26 +112,7 @@ body::before {
   z-index: 0;
 }
 
-/* Slow-drifting cloud band */
-body::after {
-  content: '';
-  position: fixed;
-  left: 0;
-  right: 0;
-  height: 90px;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(circle at 20% 50%, rgba(255,255,255,0.55) 0 18px, transparent 19px),
-    radial-gradient(circle at 32% 40%, rgba(255,255,255,0.55) 0 14px, transparent 15px),
-    radial-gradient(circle at 70% 55%, rgba(255,255,255,0.45) 0 16px, transparent 17px);
-  animation: cloud-drift 22s linear infinite;
-}
 
-@keyframes cloud-drift {
-  0% { transform: translateX(-15vw); top: 6%; }
-  100% { transform: translateX(115vw); top: 6%; }
-}
 
 #root {
   position: relative;
