@@ -1367,6 +1367,12 @@ button.btn-play-toggle:hover {
     print-color-adjust: exact !important;
   }
 
+  body::before,
+  body::after {
+    display: none !important;
+    content: none !important;
+  }
+
   body.pdf-modal-open #root {
     display: none !important;
   }
