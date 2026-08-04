@@ -1,7 +1,7 @@
 # CSARCH2 Case Study 1: Machine 7 Cache Memory Simulator
 
 ## Deployed Link: https://limj72.github.io/CSARCH2-CaseStudy1-Group2/
-## Youtube Link: 
+## Youtube Link: https://www.youtube.com/watch?v=rR8IT_uFtoI
 
 > **Machine 7 Configuration:** 4-Way Block Set Associative (BSA) — **LRU vs. MRU Replacement Policies**
 
