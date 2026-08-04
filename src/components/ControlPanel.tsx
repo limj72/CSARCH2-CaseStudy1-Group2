@@ -436,7 +436,7 @@ export default function ControlPanel() {
                                 setIsPlaying(false);
                                 setCurrentStepIndex(Number(e.target.value));
                             }}
-                            className="scrubber-slider"
+                            className={`scrubber-slider ${isPlaying ? "is-playing" : ""}`}
                         />
                     </div>
                 </div>

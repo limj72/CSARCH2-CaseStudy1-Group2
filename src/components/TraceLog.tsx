@@ -12,12 +12,13 @@ export default function TraceLog({ trace, currentStep, highlight }: TraceLogProp
 
     // Auto-scroll active step row into view
     useEffect(() => {
-        if (highlight && activeRowRef.current) {
-            activeRowRef.current.scrollIntoView({
-                behavior: "smooth",
-                block: "nearest",
-            });
-        }
+        // Disabled: scrollIntoView was hijacking the page scroll
+        // if (highlight && activeRowRef.current) {
+        //     activeRowRef.current.scrollIntoView({
+        //         behavior: "smooth",
+        //         block: "nearest",
+        //     });
+        // }
     }, [currentStep, highlight]);
 
     return (

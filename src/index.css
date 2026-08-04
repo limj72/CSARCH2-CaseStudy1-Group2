@@ -534,14 +534,22 @@ button.btn-play-toggle:hover {
 
 .scrubber-slider::-webkit-slider-thumb {
   appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--accent-light);
-  box-shadow: var(--shadow-sm);
+  width: 28px;
+  height: 28px;
+  background-image: url('./assets/still_goomba.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: transparent;
   cursor: pointer;
   transition: transform 0.15s ease;
-  border: 2px solid var(--text-primary);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.scrubber-slider.is-playing::-webkit-slider-thumb {
+  background-image: url('./assets/goomba-walking.gif');
 }
 
 .scrubber-slider::-webkit-slider-thumb:hover {
@@ -549,13 +557,21 @@ button.btn-play-toggle:hover {
 }
 
 .scrubber-slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--accent-light);
-  box-shadow: var(--shadow-sm);
+  width: 28px;
+  height: 28px;
+  background-image: url('./assets/still_goomba.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: transparent;
   cursor: pointer;
-  border: 2px solid var(--text-primary);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.scrubber-slider.is-playing::-moz-range-thumb {
+  background-image: url('./assets/goomba-walking.gif');
 }
 
 /* --- Active Step Target Highlights in Grid --- */

@@ -21,12 +21,13 @@ export default function CacheGrid({
 
     // Auto-scroll active targeted set into view inside cache-set-list container
     useEffect(() => {
-        if (activeResult !== undefined && activeSetRef.current) {
-            activeSetRef.current.scrollIntoView({
-                behavior: "smooth",
-                block: "nearest",
-            });
-        }
+        // Disabled: scrollIntoView was hijacking the page scroll
+        // if (activeResult !== undefined && activeSetRef.current) {
+        //     activeSetRef.current.scrollIntoView({
+        //         behavior: "smooth",
+        //         block: "nearest",
+        //     });
+        // }
     }, [activeResult?.setIndex]);
 
     return (
