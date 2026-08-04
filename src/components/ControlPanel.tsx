@@ -413,7 +413,7 @@ export default function ControlPanel() {
                             >
                                 {isPlaying ? (
                                     <>
-                                        <span className="goomba-spinner" title="Simulation Playing...">🍄</span>
+                                        <span className="goomba-spinner" title="Simulation Playing..."></span>
                                         Pause
                                     </>
                                 ) : isAtEnd ? (
