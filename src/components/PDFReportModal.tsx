@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { SimulationResult } from "../types/SimulationResult";
 
 interface PDFReportModalProps {
@@ -49,7 +50,8 @@ export default function PDFReportModal({
     const lruStats = resultLRU?.statistics;
     const mruStats = resultMRU?.statistics;
 
-    return (
+    // Portal to body: the print stylesheet hides #root, so the modal must escape it.
+    return createPortal(
         <div className="pdf-modal-overlay">
             <div className="pdf-modal-container">
                 {/* Modal Toolbar (Hidden on Print) */}
@@ -326,6 +328,7 @@ export default function PDFReportModal({
 
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
