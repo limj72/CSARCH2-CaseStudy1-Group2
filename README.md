@@ -269,6 +269,24 @@ Because the cache only holds 4 blocks, but the sequential working set requests 8
 
 ---
 
+### Test Case E: Maximum Cache Size (Sequential)
+To complete the edge case analysis, the simulator was tested at its absolute maximum configurable limits.
+- **Configuration**: 64 Cache Blocks (maximum), Block Size of 16 words (maximum), Load-Through.
+- **Architecture**: A 64-block cache utilizing 4-Way Set Associativity results in exactly **16 Sets** ($64 / 4$).
+
+#### Benchmark Results (Maximum Capacity):
+| Replacement Policy | Total Accesses | Hits | Misses | Hit Rate | Miss Rate | AMAT (cycles) | Total Access Time |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **LRU** | 256 | 0 | 256 | **0.00%** | **100.00%** | 11.00 | 2,816.00 |
+| **MRU** | 256 | 64 | 192 | **25.00%** | **75.00%** | 8.50 | 2,176.00 |
+
+#### Analysis:
+Even though the cache capacity was vastly increased (64 blocks), the sequential working set scales proportionally with the cache size ($2n = 128$ accessed blocks). Because the working set strictly exceeds the cache size by a factor of 2, the exact same thrashing behavior occurs.
+- **LRU** still yields a 0% hit rate, as the cyclic access pattern ensures every block is evicted exactly before it is needed again.
+- **MRU** perfectly maintains a 25% hit rate. The mathematics behind this are fascinating: out of the 8 blocks that map to each set, MRU preserves the first 3 blocks accessed. Then it thrashes the 4th way for the middle blocks, which actually leaves the *last* block accessed safely residing in the cache. On the second loop, it hits on the first 3 blocks AND the last block (4 hits per set). With 16 sets, this yields exactly $4 \times 16 = 64$ hits!
+
+---
+
 ### Comparative Summary & Architectural Insights
 
 1. **Cyclic Working Sets & Belady's Anomaly**:
